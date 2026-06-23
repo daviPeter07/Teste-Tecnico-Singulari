@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum NewsSentiment {
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
+}
+
+enum CurationRunStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id           String           @id @default(uuid())
+  name         String
+  email        String           @unique
+  passwordHash String           @map("password_hash")
+  preferences  UserPreference[]
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Category {
+  id          String           @id @default(uuid())
+  name        String
+  slug        String           @unique
+  description String?
+  news        News[]
+  preferences UserPreference[]
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  @@map("categories")
+}
+
+model UserPreference {
+  userId     String   @map("user_id")
+  categoryId String   @map("category_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([userId, categoryId])
+  @@map("user_preferences")
+}
+
+model News {
+  id          String         @id @default(uuid())
+  title       String
+  sourceName  String         @map("source_name")
+  sourceUrl   String?        @map("source_url")
+  url         String?        @unique
+  content     String
+  summary     String
+  sentiment   NewsSentiment?
+  entities    Json?
+  publishedAt DateTime       @map("published_at")
+  categoryId  String         @map("category_id")
+  category    Category       @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  @@index([publishedAt])
+  @@index([categoryId])
+  @@map("news")
+}
+
+model CurationRun {
+  id           String            @id @default(uuid())
+  status       CurationRunStatus
+  sourceType   String            @map("source_type")
+  itemsFound   Int               @default(0) @map("items_found")
+  itemsQueued  Int               @default(0) @map("items_queued")
+  itemsSaved   Int               @default(0) @map("items_saved")
+  errorMessage String?           @map("error_message")
+  startedAt    DateTime          @default(now()) @map("started_at")
+  finishedAt   DateTime?         @map("finished_at")
+
+  @@map("curation_runs")
+}
