@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { PrismaRepository } from '../../database/prisma.repository';
 import { Prisma } from '../../../generated/prisma/client';
 
 type FindManyNewsParams = {
@@ -12,8 +13,10 @@ type FindManyNewsParams = {
 type CountNewsParams = Omit<FindManyNewsParams, 'skip' | 'take'>;
 
 @Injectable()
-export class NewsRepository {
-  constructor(private readonly prismaService: PrismaService) {}
+export class NewsRepository extends PrismaRepository {
+  constructor(prismaService: PrismaService) {
+    super(prismaService);
+  }
 
   async findMany(params: FindManyNewsParams) {
     const where = this.buildWhere(params);
