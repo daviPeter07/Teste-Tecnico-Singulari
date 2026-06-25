@@ -1,13 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-type CategoryResponseDtoParams = {
+type PreferenceResponseDtoParams = {
   id: string;
   name: string;
   slug: string;
   description?: string | null;
 };
 
-export class CategoryResponseDto {
+export class PreferenceResponseDto {
   @ApiProperty({
     example: 'b8f8c3f7-6f4d-4e43-91d2-4d1f9b3c6d15',
   })
@@ -28,16 +28,17 @@ export class CategoryResponseDto {
   })
   description?: string | null;
 
-  constructor(params: CategoryResponseDtoParams) {
+  constructor(params: PreferenceResponseDtoParams) {
     this.id = params.id;
     this.name = params.name;
     this.slug = params.slug;
     this.description = params.description;
   }
 
-  //mapper
-  static fromEntity(category: CategoryResponseDtoParams): CategoryResponseDto {
-    return new CategoryResponseDto({
+  static fromEntity(
+    category: PreferenceResponseDtoParams,
+  ): PreferenceResponseDto {
+    return new PreferenceResponseDto({
       id: category.id,
       name: category.name,
       slug: category.slug,
