@@ -7,6 +7,8 @@ import { AppService } from './app.service';
 import appConfig from './config/app.config';
 import { envValidationSchema } from './config/env.validation';
 import { HealthModule } from './modules/health/health.module';
+import { NewsModule } from './modules/news/news.module';
+import { PreferencesModule } from './modules/preferences/preferences.module';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { HealthModule } from './modules/health/health.module';
     }),
     CoreModule,
     HealthModule,
+    NewsModule,
+    PreferencesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
