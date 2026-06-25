@@ -35,6 +35,7 @@ export class CategoryResponseDto {
     this.description = params.description;
   }
 
+  //mapper
   static fromEntity(category: CategoryResponseDtoParams): CategoryResponseDto {
     return new CategoryResponseDto({
       id: category.id,
