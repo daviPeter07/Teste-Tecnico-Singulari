@@ -5,7 +5,7 @@ import { IsIn, IsOptional, Max, Min } from 'class-validator';
 export class RunCurationDto {
   @ApiPropertyOptional({
     example: 5,
-    default: 1,
+    default: 5,
     minimum: 1,
     maximum: 20,
     description: 'Number of items to generate and enqueue',

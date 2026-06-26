@@ -1,13 +1,7 @@
+import { CuratedNewsItem } from '../types/curated-news-item.type';
+
 export class CurationJobDto {
   runId!: string;
   sourceType!: string;
-  item!: {
-    title: string;
-    sourceName: string;
-    sourceUrl: string | null;
-    url?: string | null;
-    content: string;
-    publishedAt: string;
-    categorySlug: string;
-  };
+  item!: CuratedNewsItem;
 }
