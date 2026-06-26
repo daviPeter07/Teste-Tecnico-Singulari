@@ -15,8 +15,10 @@ enum NewsSentiment {
 }
 
 enum CurationRunStatus {
+  QUEUED
   RUNNING
   COMPLETED
+  PARTIAL
   FAILED
 }
 
@@ -100,7 +102,9 @@ model CurationRun {
   sourceType   String            @map("source_type")
   itemsFound   Int               @default(0) @map("items_found")
   itemsQueued  Int               @default(0) @map("items_queued")
+  itemsProcessed Int             @default(0) @map("items_processed")
   itemsSaved   Int               @default(0) @map("items_saved")
+  itemsFailed  Int               @default(0) @map("items_failed")
   errorMessage String?           @map("error_message")
   startedAt    DateTime          @default(now()) @map("started_at")
   finishedAt   DateTime?         @map("finished_at")
