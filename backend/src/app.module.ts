@@ -11,6 +11,7 @@ import { NewsModule } from './modules/news/news.module';
 import { PreferencesModule } from './modules/preferences/preferences.module';
 import { UsersModule } from './modules/users/users.module';
 import { QueueModule } from './modules/queue/queue.module';
+import { CurationModule } from './modules/curation/curation.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { QueueModule } from './modules/queue/queue.module';
     PreferencesModule,
     UsersModule,
     QueueModule,
+    CurationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
