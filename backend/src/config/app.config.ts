@@ -21,6 +21,8 @@ export default () => ({
   ai: {
     provider: process.env.AI_PROVIDER ?? 'mock',
     openAiApiKey: process.env.OPENAI_API_KEY,
+    openAiModel: process.env.OPENAI_MODEL ?? 'gpt-4o-mini',
     anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+    anthropicModel: process.env.ANTHROPIC_MODEL ?? 'claude-3-5-haiku-latest',
   },
 });

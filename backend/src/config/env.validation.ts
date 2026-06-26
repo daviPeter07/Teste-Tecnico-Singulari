@@ -18,6 +18,8 @@ export const envValidationSchema = Joi.object({
   AI_PROVIDER: Joi.string()
     .valid('mock', 'openai', 'anthropic')
     .default('mock'),
-  AI_API_KEY: Joi.string().allow('').optional(),
+  OPENAI_API_KEY: Joi.string().allow('').optional(),
+  OPENAI_MODEL: Joi.string().allow('').optional(),
   ANTHROPIC_API_KEY: Joi.string().allow('').optional(),
+  ANTHROPIC_MODEL: Joi.string().allow('').optional(),
 });
