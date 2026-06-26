@@ -162,8 +162,11 @@ JWT_EXPIRES_IN="1d"
 REDIS_HOST=localhost
 REDIS_PORT=6379
 
+AI_PROVIDER=mock
 OPENAI_API_KEY=""
+OPENAI_MODEL="gpt-4o-mini"
 ANTHROPIC_API_KEY=""
+ANTHROPIC_MODEL="claude-3-5-haiku-latest"
 ```
 
 Observação sobre ferramentas:
@@ -354,4 +357,5 @@ pnpm test:e2e
 - o backend compila com `pnpm build`
 - o seed cria categorias e notícias de exemplo para desenvolvimento
 - a autenticação já está pronta para o frontend consumir
-- o próximo passo natural do desafio, no backend, é o agente curador separado
+- a curadoria roda em worker separado com BullMQ + Redis
+- a API dispara execuções de curadoria e o worker processa a descoberta e o enriquecimento das notícias

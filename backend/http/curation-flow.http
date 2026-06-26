@@ -38,8 +38,12 @@ Content-Type: application/json
 }
 
 ###
-# Aguarde 2-5 segundos para o worker consumir a fila.
-# Depois execute as consultas abaixo.
+# Consultar status da execucao
+GET {{baseUrl}}/curation/runs/{{runCuration.response.body.$.id}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+###
+# Aguarde 2-5 segundos para o worker consumir a fila e rode o status novamente.
 
 ###
 # Conferir noticias apos a curadoria

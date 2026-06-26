@@ -1,8 +1,17 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { CurationService } from './curation.service';
 import {
   ApiBearerAuth,
   ApiOkResponse,
+  ApiParam,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
@@ -24,5 +33,20 @@ export class CurationController {
   })
   run(@Body() body: RunCurationDto) {
     return this.curationService.run(body);
+  }
+
+  @Get('runs/:id')
+  @ApiOperation({
+    summary: 'Get curation run status',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Curation run id',
+  })
+  @ApiOkResponse({
+    description: 'Current curation run state and counters',
+  })
+  findRunById(@Param('id') id: string) {
+    return this.curationService.findRunById(id);
   }
 }
