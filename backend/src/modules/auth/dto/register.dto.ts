@@ -8,13 +8,13 @@ export class RegisterDto {
   })
   @IsString()
   @MinLength(2)
-  name: string;
+  name!: string;
 
   @ApiProperty({
     example: 'jane.doe@example.com',
   })
   @IsEmail()
-  email: string;
+  email!: string;
 
   @ApiProperty({
     example: 'strong-password',
@@ -22,7 +22,7 @@ export class RegisterDto {
   })
   @IsString()
   @MinLength(8)
-  password: string;
+  password!: string;
 
   @ApiProperty({
     example: 'strong-password',
@@ -33,5 +33,5 @@ export class RegisterDto {
   @Match<RegisterDto>('password', {
     message: 'confirmPassword must match password',
   })
-  confirmPassword: string;
+  confirmPassword!: string;
 }

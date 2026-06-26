@@ -9,5 +9,5 @@ export class UpdateUserPreferencesDto {
   @IsArray()
   @ArrayUnique()
   @IsUUID('4', { each: true })
-  categoryIds: string[];
+  categoryIds!: string[];
 }
