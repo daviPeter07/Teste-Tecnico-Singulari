@@ -9,6 +9,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
 import { NewsModule } from './modules/news/news.module';
 import { PreferencesModule } from './modules/preferences/preferences.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { PreferencesModule } from './modules/preferences/preferences.module';
     HealthModule,
     NewsModule,
     PreferencesModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
