@@ -1,14 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CurationRepository } from './curation.repository';
 import { RunCurationDto } from './dto/run-curation.dto';
 import { QueueService } from '../queue/queue.service';
-import { TemplateNewsSource } from './sources/template-news.source';
 
 @Injectable()
 export class CurationService {
   constructor(
     private readonly curationRepository: CurationRepository,
-    private readonly templateNewsSource: TemplateNewsSource,
     private readonly queueService: QueueService,
   ) {}
 
@@ -19,30 +17,23 @@ export class CurationService {
     const run = await this.curationRepository.createRun(sourceType);
 
     try {
-      const items = this.templateNewsSource.generate(limit);
-
-      for (const item of items) {
-        await this.queueService.enqueueNewsCurationJob({
-          runId: run.id,
-          sourceType,
-          item,
-        });
-      }
-
-      const updatedRun = await this.curationRepository.updateRunAfterEnqueue({
+      const queuedRunJob = await this.queueService.enqueueCurationRunJob({
         runId: run.id,
-        itemsFound: items.length,
-        itemsQueued: items.length,
+        sourceType,
+        limit,
       });
 
       return {
-        id: updatedRun.id,
-        status: updatedRun.status,
-        sourceType: updatedRun.sourceType,
-        itemsFound: updatedRun.itemsFound,
-        itemsQueued: updatedRun.itemsQueued,
-        itemsSaved: updatedRun.itemsSaved,
-        startedAt: updatedRun.startedAt,
+        id: run.id,
+        status: run.status,
+        sourceType: run.sourceType,
+        itemsFound: run.itemsFound,
+        itemsQueued: run.itemsQueued,
+        itemsProcessed: run.itemsProcessed,
+        itemsSaved: run.itemsSaved,
+        itemsFailed: run.itemsFailed,
+        startedAt: run.startedAt,
+        jobId: queuedRunJob.id,
       };
     } catch (error) {
       await this.curationRepository.markRunAsFailed(
@@ -52,5 +43,15 @@ export class CurationService {
 
       throw error;
     }
+  }
+
+  async findRunById(runId: string) {
+    const run = await this.curationRepository.findRunById(runId);
+
+    if (!run) {
+      throw new NotFoundException(`Curation run ${runId} not found`);
+    }
+
+    return run;
   }
 }

@@ -3,7 +3,7 @@ import { CurationRunStatus } from '../../../generated/prisma/enums';
 import { PrismaRepository } from '../../database/prisma.repository';
 import { PrismaService } from '../../database/prisma.service';
 
-type UpdateRunAfterEnqueueParams = {
+type UpdateRunAfterDiscoveryParams = {
   runId: string;
   itemsFound: number;
   itemsQueued: number;
@@ -18,14 +18,44 @@ export class CurationRepository extends PrismaRepository {
   createRun(sourceType: string) {
     return this.prismaService.curationRun.create({
       data: {
-        status: CurationRunStatus.RUNNING,
+        status: CurationRunStatus.QUEUED,
         sourceType,
       },
     });
   }
 
-  updateRunAfterEnqueue(params: UpdateRunAfterEnqueueParams) {
-    return this.prismaService.curationRun.update({
+  findRunById(runId: string) {
+    return this.prismaService.curationRun.findUnique({
+      where: {
+        id: runId,
+      },
+    });
+  }
+
+  async markRunAsRunning(runId: string) {
+    await this.prismaService.curationRun.updateMany({
+      where: {
+        id: runId,
+        status: {
+          in: [CurationRunStatus.QUEUED, CurationRunStatus.RUNNING],
+        },
+      },
+      data: {
+        status: CurationRunStatus.RUNNING,
+        errorMessage: null,
+        finishedAt: null,
+      },
+    });
+
+    return this.prismaService.curationRun.findUniqueOrThrow({
+      where: {
+        id: runId,
+      },
+    });
+  }
+
+  async updateRunAfterDiscovery(params: UpdateRunAfterDiscoveryParams) {
+    const run = await this.prismaService.curationRun.update({
       where: {
         id: params.runId,
       },
@@ -34,18 +64,41 @@ export class CurationRepository extends PrismaRepository {
         itemsQueued: params.itemsQueued,
       },
     });
+
+    if (run.itemsQueued === 0) {
+      return this.prismaService.curationRun.update({
+        where: {
+          id: params.runId,
+        },
+        data: {
+          status: CurationRunStatus.COMPLETED,
+          finishedAt: new Date(),
+        },
+      });
+    }
+
+    return run;
   }
 
-  markRunAsFailed(runId: string, errorMessage: string) {
-    return this.prismaService.curationRun.update({
+  async markRunAsFailed(runId: string, errorMessage: string) {
+    await this.prismaService.curationRun.updateMany({
       where: {
         id: runId,
+        status: {
+          in: [CurationRunStatus.QUEUED, CurationRunStatus.RUNNING],
+        },
       },
 
       data: {
         status: CurationRunStatus.FAILED,
         errorMessage,
         finishedAt: new Date(),
+      },
+    });
+
+    return this.prismaService.curationRun.findUniqueOrThrow({
+      where: {
+        id: runId,
       },
     });
   }
@@ -74,43 +127,78 @@ export class CurationRepository extends PrismaRepository {
     });
   }
 
-  async registerProcessedItem(runId: string) {
-    return this.prismaService.$transaction(async (transaction) => {
-      const currentRun = await transaction.curationRun.findUniqueOrThrow({
-        where: {
-          id: runId,
+  async registerSavedItem(runId: string) {
+    const run = await this.prismaService.curationRun.update({
+      where: {
+        id: runId,
+      },
+      data: {
+        itemsProcessed: {
+          increment: 1,
         },
-      });
-
-      const nextItemsSaved = currentRun.itemsSaved + 1;
-      const shouldComplete =
-        currentRun.itemsQueued > 0 && nextItemsSaved >= currentRun.itemsQueued;
-
-      return transaction.curationRun.update({
-        where: {
-          id: runId,
+        itemsSaved: {
+          increment: 1,
         },
-        data: {
-          itemsSaved: {
-            increment: 1,
-          },
-          status: shouldComplete ? CurationRunStatus.COMPLETED : undefined,
-          finishedAt: shouldComplete ? new Date() : undefined,
-        },
-      });
+      },
     });
+
+    return this.finalizeRunIfNeeded(runId, run);
   }
 
-  markRunAsFailedByJob(runId: string, errorMessage: string) {
+  async registerFailedItem(runId: string, errorMessage: string) {
+    const run = await this.prismaService.curationRun.update({
+      where: {
+        id: runId,
+      },
+      data: {
+        itemsProcessed: {
+          increment: 1,
+        },
+        itemsFailed: {
+          increment: 1,
+        },
+        errorMessage,
+      },
+    });
+
+    return this.finalizeRunIfNeeded(runId, run);
+  }
+
+  private async finalizeRunIfNeeded(
+    runId: string,
+    run: {
+      itemsFailed: number;
+      itemsProcessed: number;
+      itemsQueued: number;
+      itemsSaved: number;
+    },
+  ) {
+    if (run.itemsQueued === 0 || run.itemsProcessed < run.itemsQueued) {
+      return this.prismaService.curationRun.findUniqueOrThrow({
+        where: {
+          id: runId,
+        },
+      });
+    }
+
     return this.prismaService.curationRun.update({
       where: {
         id: runId,
       },
       data: {
-        status: CurationRunStatus.FAILED,
-        errorMessage,
+        status: this.getFinalStatus(run),
         finishedAt: new Date(),
       },
     });
+  }
+
+  private getFinalStatus(run: { itemsFailed: number; itemsSaved: number }) {
+    if (run.itemsFailed === 0) {
+      return CurationRunStatus.COMPLETED;
+    }
+
+    return run.itemsSaved > 0
+      ? CurationRunStatus.PARTIAL
+      : CurationRunStatus.FAILED;
   }
 }

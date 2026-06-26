@@ -1,23 +1,24 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { NewsSentiment } from '../../../../generated/prisma/enums';
 import { NewsRepository } from '../../news/news.repository';
 import {
-  NEWS_CURATION_QUEUE,
+  NEWS_PROCESSING_QUEUE,
   QUEUE_JOB_NAMES,
 } from '../../queue/queue.constants';
 import { CurationRepository } from '../curation.repository';
 import { CurationJobDto } from '../dto/curation-job.dto';
+import { NewsEnrichmentService } from '../news-enrichment.service';
 
 @Injectable()
-@Processor(NEWS_CURATION_QUEUE)
-export class NewsCurationProcessor extends WorkerHost {
-  private readonly logger = new Logger(NewsCurationProcessor.name);
+@Processor(NEWS_PROCESSING_QUEUE)
+export class NewsProcessingProcessor extends WorkerHost {
+  private readonly logger = new Logger(NewsProcessingProcessor.name);
 
   constructor(
     private readonly curationRepository: CurationRepository,
     private readonly newsRepository: NewsRepository,
+    private readonly newsEnrichmentService: NewsEnrichmentService,
   ) {
     super();
   }
@@ -28,7 +29,7 @@ export class NewsCurationProcessor extends WorkerHost {
         return this.processNewsItem(job);
 
       default:
-        this.logger.warn(`Unknown curation job received: ${job.name}`);
+        this.logger.warn(`Unknown news processing job received: ${job.name}`);
         return null;
     }
   }
@@ -51,17 +52,17 @@ export class NewsCurationProcessor extends WorkerHost {
         sourceUrl: item.sourceUrl,
         url: item.url,
         content: item.content,
-        summary: this.createSummary(item.content),
-        sentiment: NewsSentiment.NEUTRAL,
-        entities: this.extractEntities(item.content),
+        summary: await this.newsEnrichmentService.summarize(item.content),
+        sentiment: this.newsEnrichmentService.detectSentiment(item.content),
+        entities: this.newsEnrichmentService.extractEntities(item.content),
         publishedAt: new Date(item.publishedAt),
         categoryId: category.id,
       });
 
-      const run = await this.curationRepository.registerProcessedItem(runId);
+      const run = await this.curationRepository.registerSavedItem(runId);
       await job.updateProgress(
         run.itemsQueued > 0
-          ? Math.round((run.itemsSaved / run.itemsQueued) * 100)
+          ? Math.round((run.itemsProcessed / run.itemsQueued) * 100)
           : 100,
       );
 
@@ -70,30 +71,25 @@ export class NewsCurationProcessor extends WorkerHost {
         categorySlug: category.slug,
       };
     } catch (error) {
-      await this.curationRepository.markRunAsFailedByJob(
-        runId,
-        error instanceof Error
-          ? error.message
-          : 'Unknown curation processor error',
-      );
+      const maxAttempts = job.opts.attempts ?? 1;
+      const isLastAttempt = job.attemptsMade + 1 >= maxAttempts;
+
+      if (isLastAttempt) {
+        const run = await this.curationRepository.registerFailedItem(
+          runId,
+          error instanceof Error
+            ? error.message
+            : 'Unknown news processing error',
+        );
+
+        await job.updateProgress(
+          run.itemsQueued > 0
+            ? Math.round((run.itemsProcessed / run.itemsQueued) * 100)
+            : 100,
+        );
+      }
 
       throw error;
     }
-  }
-
-  private createSummary(content: string) {
-    if (content.length <= 160) {
-      return content;
-    }
-
-    return `${content.slice(0, 157).trim()}...`;
-  }
-
-  private extractEntities(content: string) {
-    const matches =
-      content.match(/\b[A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*\b/g) ?? [];
-    const uniqueMatches = Array.from(new Set(matches));
-
-    return uniqueMatches.slice(0, 5);
   }
 }
