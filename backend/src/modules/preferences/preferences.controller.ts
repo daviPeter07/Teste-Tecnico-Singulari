@@ -1,9 +1,15 @@
 import { Controller, Get } from '@nestjs/common';
-import { PreferencesService } from './preferences.service';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { PreferenceResponseDto } from './dto/preferences-response.dto';
+import { PreferencesService } from './preferences.service';
 
 @ApiTags('Preferences')
+@ApiBearerAuth('jwt')
 @Controller('preferences')
 export class PreferencesController {
   constructor(private readonly preferencesService: PreferencesService) {}
