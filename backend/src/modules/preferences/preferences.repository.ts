@@ -8,11 +8,21 @@ export class PreferencesRepository extends PrismaRepository {
     super(prismaService);
   }
 
-  async findMany() {
+  findMany() {
     return this.prismaService.category.findMany({
       orderBy: {
         name: 'asc',
-      }
+      },
+    });
+  }
+
+  countByIds(ids: string[]) {
+    return this.prismaService.category.count({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
     });
   }
 }

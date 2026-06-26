@@ -1,5 +1,6 @@
 import { Module, ValidationPipe } from '@nestjs/common';
-import { APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_PIPE } from '@nestjs/core';
+import { AppExceptionFilter } from '../common/exceptions/app-exception.filter';
 
 @Module({
   providers: [
@@ -11,6 +12,10 @@ import { APP_PIPE } from '@nestjs/core';
           forbidNonWhitelisted: true,
           transform: true,
         }),
+    },
+    {
+      provide: APP_FILTER,
+      useClass: AppExceptionFilter,
     },
   ],
 })
