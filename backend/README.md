@@ -1,98 +1,343 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Newsletter Inteligente - Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API REST desenvolvida em NestJS para o desafio da Newsletter Inteligente.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+O foco essencial pedido no enunciado para o backend era:
 
-## Description
+- expor notícias via `GET /news`
+- suportar paginação
+- suportar filtro por periodo `day|week|month`
+- persistir notícias e categorias em banco
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Hoje este backend entrega esse núcleo e também já inclui parte dos itens bônus, como autenticação e preferências do usuário.
 
-## Project setup
+## Stack
 
-```bash
-$ pnpm install
+- Node.js 20
+- NestJS
+- Prisma
+- PostgreSQL
+- Redis
+- Docker Compose
+
+## Decisoes tecnicas
+
+### Banco de dados
+
+Foi escolhido PostgreSQL.
+
+Motivos:
+
+- o domínio tem relações claras entre `users`, `categories`, `user_preferences`, `news` e `user_sessions`
+- filtros, ordenação e paginação ficam simples e previsíveis em SQL
+- consistência relacional ajuda principalmente em preferências e categorias
+- Prisma funciona muito bem com esse modelo e acelera a implementacao
+
+### ORM
+
+Foi escolhido Prisma para:
+
+- manter a modelagem tipada
+- facilitar migrations e seed
+- deixar a camada de acesso a dados mais simples de manter
+
+### Autenticacao
+
+Foi escolhido JWT com Nest Passport.
+
+O backend usa:
+
+- login com email e senha
+- hash de senha com `bcrypt`
+- guard global para proteger rotas privadas
+- sessões persistidas em `user_sessions` para permitir logout real
+
+## Escopo atual do backend
+
+### Essencial entregue
+
+- `GET /news` com paginação
+- filtro por periodo em `GET /news?period=day|week|month`
+- listagem de categorias/preferências disponíveis
+- seed inicial de categorias e notícias
+- documentação via Swagger
+
+### Bônus já implementado
+
+- `POST /users` para cadastro
+- `POST /login` para autenticação
+- `POST /logout` para encerrar a sessão atual
+- `GET /users/me/preferences`
+- `PUT /users/me/preferences`
+- proteção das rotas privadas com JWT
+
+### Ainda fora deste serviço
+
+Os pontos abaixo fazem parte do desafio completo, mas ainda não estão implementados neste backend:
+
+- agente curador separado
+- mensageria com produtor/consumidor
+- resumo com IA
+- testes automatizados completos
+
+## Modelagem principal
+
+### `users`
+
+- `id`
+- `name`
+- `email`
+- `password_hash`
+- `created_at`
+- `updated_at`
+
+### `categories`
+
+- `id`
+- `name`
+- `slug`
+- `description`
+- `created_at`
+- `updated_at`
+
+### `user_preferences`
+
+Relaciona usuário com categorias escolhidas.
+
+### `news`
+
+- `id`
+- `title`
+- `source_name`
+- `source_url`
+- `url`
+- `content`
+- `summary`
+- `sentiment`
+- `entities`
+- `published_at`
+- `category_id`
+- `created_at`
+- `updated_at`
+
+### `user_sessions`
+
+Tabela de sessão usada para permitir logout real com JWT.
+
+- `id`
+- `user_id`
+- `expires_at`
+- `revoked_at`
+- `created_at`
+- `updated_at`
+
+## Estrutura de modulos
+
+- `auth`: cadastro, login, logout, JWT e sessão
+- `news`: listagem de notícias e filtros
+- `preferences`: categorias disponíveis
+- `users`: preferências do usuário autenticado
+- `common`: paginação, decorators, exceptions e validações compartilhadas
+
+## Variaveis de ambiente
+
+Use o arquivo `.env.example` como base.
+
+Variáveis principais:
+
+```env
+NODE_ENV=development
+PORT=3333
+
+POSTGRES_DB=newsletter_db
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_PORT=5433
+
+DATABASE_URL="postgresql://postgres:postgres@localhost:5433/newsletter_db?schema=public"
+
+JWT_SECRET="dev_secret_change_later"
+JWT_EXPIRES_IN="1d"
+
+REDIS_HOST=redis
+REDIS_PORT=6379
 ```
 
-## Compile and run the project
+## Como rodar localmente
+
+### 1. Instalar dependências
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+pnpm install
 ```
 
-## Run tests
+### 2. Criar o `.env`
+
+Copie os valores de `backend/.env.example` para `backend/.env`.
+
+### 3. Subir banco e redis
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+docker compose up -d postgres redis
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 4. Aplicar migrations
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+pnpm prisma migrate dev
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 5. Popular o banco com dados iniciais
 
-## Resources
+```bash
+pnpm prisma:seed
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+### 6. Rodar a API
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+pnpm start:dev
+```
 
-## Support
+## Como rodar com Docker Compose
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+docker compose up --build
+```
 
-## Stay in touch
+Observação: se estiver subindo tudo pela primeira vez, ainda é necessário aplicar migration e seed no banco.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Documentação da API
 
-## License
+Com a API rodando:
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- Swagger: `http://localhost:3333/docs`
+
+Para teste manual do fluxo completo, o caminho mais prático deste projeto é usar o arquivo:
+
+- `backend/http/auth-complete-flow.http`
+
+## Endpoints principais
+
+### Públicos
+
+- `GET /`
+- `GET /health`
+- `POST /users`
+- `POST /login`
+
+### Protegidos por JWT
+
+- `POST /logout`
+- `GET /news`
+- `GET /preferences`
+- `GET /users/me/preferences`
+- `PUT /users/me/preferences`
+
+## Exemplos de uso
+
+Os exemplos abaixo também estão organizados no arquivo `backend/http/auth-complete-flow.http`, que pode ser usado para testar o backend do início ao fim.
+
+### Cadastro
+
+```http
+POST /users
+Content-Type: application/json
+
+{
+  "name": "Jane Doe",
+  "email": "jane.doe@example.com",
+  "password": "strong-password",
+  "confirmPassword": "strong-password"
+}
+```
+
+### Login
+
+```http
+POST /login
+Content-Type: application/json
+
+{
+  "email": "jane.doe@example.com",
+  "password": "strong-password"
+}
+```
+
+### Notícias com filtro por período
+
+```http
+GET /news?page=1&limit=10&period=week
+Authorization: Bearer <TOKEN>
+```
+
+### Atualizar preferências do usuário
+
+```http
+PUT /users/me/preferences
+Authorization: Bearer <TOKEN>
+Content-Type: application/json
+
+{
+  "categoryIds": [
+    "<CATEGORY_ID_1>",
+    "<CATEGORY_ID_2>"
+  ]
+}
+```
+
+## Fluxo de teste manual
+
+O usuário pode testar o backend diretamente pelo arquivo:
+
+- `backend/http/auth-complete-flow.http`
+
+Esse é o fluxo recomendado para validar a API manualmente.
+
+Se estiver usando VS Code, basta abrir o arquivo com uma extensão compatível com requests HTTP, como REST Client, e executar as chamadas em sequência.
+
+O arquivo já traz variáveis prontas para teste:
+
+- `@baseUrl = http://localhost:3333`
+- `@userName = User teste`
+- `@userEmail = userteste@teste.com`
+- `@userPassword = strong-password`
+
+Antes de rodar o fluxo, garanta que:
+
+- a API está em execução
+- o banco já recebeu as migrations
+- o seed foi executado, para que existam categorias disponíveis em `/preferences`
+
+Esse arquivo cobre:
+
+- acesso público
+- tentativa sem token
+- cadastro
+- login
+- listagem de categorias disponíveis em `GET /preferences`
+- listagem de preferências
+- atualização das preferências do usuário
+- consulta de notícias autenticada
+- consulta de notícias com filtro por categoria
+- logout
+- validação de rota bloqueada após logout
+
+## Comandos úteis
+
+```bash
+pnpm build
+pnpm start:dev
+pnpm prisma generate
+pnpm prisma migrate dev
+pnpm prisma:seed
+pnpm test
+pnpm test:e2e
+```
+
+## Observações finais
+
+- o backend compila com `pnpm build`
+- o seed cria categorias e notícias de exemplo para desenvolvimento
+- a autenticação já está pronta para o frontend consumir
+- o próximo passo natural do desafio, no backend, é o agente curador separado
