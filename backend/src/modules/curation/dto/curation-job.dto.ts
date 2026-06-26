@@ -7,7 +7,7 @@ export class CurationJobDto {
     sourceUrl: string | null;
     url?: string | null;
     content: string;
-    publishedAt: Date;
+    publishedAt: string;
     categorySlug: string;
   };
 }

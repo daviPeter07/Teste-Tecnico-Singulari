@@ -1,0 +1,57 @@
+@baseUrl = http://localhost:3333
+@userEmail = userteste@teste.com
+@userPassword = strong-password
+
+###
+# Antes de executar este arquivo:
+# 1. Suba postgres e redis
+# 2. Suba a API
+# 3. Suba o worker
+# 4. Garanta que o seed ja foi executado
+
+###
+# Login
+# @name login
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "email": "{{userEmail}}",
+  "password": "{{userPassword}}"
+}
+
+###
+# Conferir noticias antes da curadoria
+GET {{baseUrl}}/news?page=1&limit=10
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+###
+# Disparar a curadoria
+# @name runCuration
+POST {{baseUrl}}/curation/run
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "sourceType": "template",
+  "limit": 5
+}
+
+###
+# Aguarde 2-5 segundos para o worker consumir a fila.
+# Depois execute as consultas abaixo.
+
+###
+# Conferir noticias apos a curadoria
+GET {{baseUrl}}/news?page=1&limit=10
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+###
+# Conferir noticias de IA
+GET {{baseUrl}}/news?page=1&limit=10&category=artificial-intelligence
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+###
+# Conferir noticias de backend
+GET {{baseUrl}}/news?page=1&limit=10&category=backend
+Authorization: Bearer {{login.response.body.$.accessToken}}
