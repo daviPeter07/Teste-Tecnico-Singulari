@@ -139,7 +139,7 @@ Tabela de sessão usada para permitir logout real com JWT.
 - `users`: preferências do usuário autenticado
 - `common`: paginação, decorators, exceptions e validações compartilhadas
 
-## Variaveis de ambiente
+## Variáveis de ambiente
 
 Use o arquivo `.env.example` como base.
 
@@ -159,9 +159,18 @@ DATABASE_URL="postgresql://postgres:postgres@localhost:5433/newsletter_db?schema
 JWT_SECRET="dev_secret_change_later"
 JWT_EXPIRES_IN="1d"
 
-REDIS_HOST=redis
+REDIS_HOST=localhost
 REDIS_PORT=6379
+
+OPENAI_API_KEY=""
+ANTHROPIC_API_KEY=""
 ```
+
+Observação sobre ferramentas:
+
+- a versão do `pnpm` está fixada em `package.json` no campo `packageManager`
+- isso garante que ambiente local, CI e Docker usem a mesma versão do gerenciador
+- esse ajuste é importante para evitar incompatibilidade entre a imagem Node 20 e versões mais novas do `pnpm`
 
 ## Como rodar localmente
 
@@ -206,6 +215,11 @@ docker compose up --build
 ```
 
 Observação: se estiver subindo tudo pela primeira vez, ainda é necessário aplicar migration e seed no banco.
+
+No ambiente Docker:
+
+- a API e o worker usam `postgres` e `redis` como hosts internos da rede do compose
+- no ambiente local fora do Docker, o `.env` usa `localhost` para acesso ao Redis e ao Postgres publicados na máquina host
 
 ## Documentação da API
 
