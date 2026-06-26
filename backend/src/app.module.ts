@@ -10,6 +10,7 @@ import { HealthModule } from './modules/health/health.module';
 import { NewsModule } from './modules/news/news.module';
 import { PreferencesModule } from './modules/preferences/preferences.module';
 import { UsersModule } from './modules/users/users.module';
+import { QueueModule } from './modules/queue/queue.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { UsersModule } from './modules/users/users.module';
     NewsModule,
     PreferencesModule,
     UsersModule,
+    QueueModule,
   ],
   controllers: [AppController],
   providers: [AppService],
