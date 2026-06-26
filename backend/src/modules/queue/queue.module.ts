@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { QueueService } from './queue.service';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { NEWS_CURATION_QUEUE } from './queue.constants';
+import { CURATION_RUN_QUEUE, NEWS_PROCESSING_QUEUE } from './queue.constants';
 
 @Module({
   imports: [
@@ -17,7 +17,10 @@ import { NEWS_CURATION_QUEUE } from './queue.constants';
       }),
     }),
     BullModule.registerQueue({
-      name: NEWS_CURATION_QUEUE,
+      name: CURATION_RUN_QUEUE,
+    }),
+    BullModule.registerQueue({
+      name: NEWS_PROCESSING_QUEUE,
     }),
   ],
   providers: [QueueService],
