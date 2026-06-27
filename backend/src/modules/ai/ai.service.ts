@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { SummarizerContract } from '../curation/contracts/summarizer.contract';
+import type { SummarizerContract } from '../curation/enrichment/contracts/summarizer.contract';
 import { AiProvider } from './providers/ai-provider.abstract';
 import { AI_PROVIDER } from './ai.module';
 
