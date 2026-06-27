@@ -1,18 +1,23 @@
 # Newsletter Inteligente - Backend
 
-API REST + worker assincrono desenvolvidos em NestJS para o desafio da Newsletter Inteligente.
+API REST + worker assíncrono desenvolvidos em NestJS para o desafio da Newsletter Inteligente.
 
-O foco essencial pedido no enunciado para o backend era:
+O backend cobre o núcleo essencial pedido no PDF:
 
-- expor noticias via `GET /news`
-- suportar paginacao
-- suportar filtro por periodo `day|week|month`
-- persistir noticias e categorias em banco
+- expor notícias via `GET /news`
+- suportar paginação
+- suportar filtro por período `day|week|month`
+- persistir notícias e categorias em banco
+- executar um agente curador high-code em worker separado
 
-Hoje este backend entrega esse nucleo e tambem inclui itens bonus:
-autenticacao com JWT, preferencias do usuario, agente curador high-code
-rodando em worker separado com mensageria BullMQ/Redis e resumo automatico
-com IA plugavel.
+Além disso, também entrega bônus importantes:
+
+- autenticação com JWT
+- preferências do usuário
+- mensageria com BullMQ + Redis
+- enriquecimento assíncrono com resumo por IA
+- testes unitários
+- Docker Compose para API, worker, banco e Redis
 
 ## Stack
 
@@ -24,7 +29,7 @@ com IA plugavel.
 - BullMQ
 - Docker Compose
 
-## Decisoes tecnicas
+## Decisões Técnicas
 
 ### Banco de dados
 
@@ -32,10 +37,10 @@ Foi escolhido PostgreSQL.
 
 Motivos:
 
-- o dominio tem relacoes claras entre `users`, `categories`, `user_preferences`, `news` e `user_sessions`
-- filtros, ordenacao e paginacao ficam simples e previsiveis em SQL
-- consistencia relacional ajuda principalmente em preferencias e categorias
-- Prisma funciona muito bem com esse modelo e acelera a implementacao
+- o domínio tem relações claras entre `users`, `categories`, `user_preferences`, `news` e `user_sessions`
+- filtros, ordenação e paginação ficam simples e previsíveis em SQL
+- consistência relacional ajuda principalmente em preferências e categorias
+- Prisma funciona muito bem com esse modelo e acelera a implementação
 
 ### ORM
 
@@ -43,46 +48,81 @@ Foi escolhido Prisma para:
 
 - manter a modelagem tipada
 - facilitar migrations e seed
-- deixar a camada de acesso a dados mais simples de manter
+- deixar a camada de acesso a dados simples de manter
 
-### Autenticacao
+### Autenticação
 
 Foi escolhido JWT com Nest Passport.
 
 O backend usa:
 
-- login com email e senha
+- login com e-mail e senha
 - hash de senha com `bcrypt`
 - guard global para proteger rotas privadas
-- sessoes persistidas em `user_sessions` para permitir logout real
+- sessões persistidas em `user_sessions` para permitir logout real
 
-## Escopo atual do backend
+### Mensageria
+
+Foi escolhido BullMQ com Redis para desacoplar a etapa de descoberta da etapa de processamento/persistência.
+
+Com isso:
+
+- a API publica a execução de curadoria sem bloquear a camada HTTP
+- o worker executa a descoberta em segundo plano
+- cada notícia encontrada vira um job independente de processamento
+- o consumidor enriquece, resume e salva a notícia no banco
+
+## Escopo Atual do Backend
 
 ### Essencial entregue
 
-- `GET /news` com paginacao
-- filtro por periodo em `GET /news?period=day|week|month`
-- listagem de categorias/preferencias disponiveis
-- seed inicial de categorias e noticias
-- documentacao via Swagger
+- `GET /news` pública com paginação
+- filtro por período em `GET /news?period=day|week|month`
+- seed inicial de categorias e notícias
+- agente curador high-code em worker separado
 
-### Bonus ja implementado
+### Bônus já implementados
 
 - `POST /users` para cadastro
-- `POST /login` para autenticacao
-- `POST /logout` para encerrar a sessao atual
+- `POST /login` para autenticação
+- `POST /logout` para encerrar a sessão atual
+- `GET /me` para perfil autenticado
+- `GET /preferences`
 - `GET /users/me/preferences`
 - `PUT /users/me/preferences`
-- protecao das rotas privadas com JWT
-- agente curador high-code rodando em worker separado
-- mensageria assincrona com BullMQ + Redis (2 filas)
-- consumidor que enriquece noticias com resumo via IA
-- provedor de IA plugavel: `mock`, `openai`, `anthropic`, `openrouter`
-- fallback automatico para resumo local se a IA falhar
-- `GET /curation/runs/:id` para acompanhar progresso da curadoria
-- rastreamento de itens processados, salvos e com falha por execucao
+- mensageria assíncrona com BullMQ + Redis
+- consumidor que enriquece notícias com resumo via IA
+- provider de IA plugável: `mock`, `openai`, `anthropic`, `openrouter`
+- fallback automático para resumo local se a IA falhar
+- `GET /curation/runs/:id` para acompanhar progresso
+- rastreamento de itens processados, salvos e com falha por execução
+- testes unitários cobrindo os principais serviços, providers e processors
 
-## Modelagem principal
+## Agente Curador High-Code
+
+O requisito obrigatório do desafio para o agente é atendido por um worker próprio em NestJS, sem uso de plataformas low-code/no-code.
+
+Hoje o agente suporta duas estratégias explícitas de descoberta:
+
+- `template` - gera notícias fictícias de tecnologia com base em templates determinísticos
+- `local-json` - lê um arquivo JSON local com sinais operacionais e transforma esses insights em notícias
+
+Exemplo de uso:
+
+```http
+POST /curation/run
+Authorization: Bearer <TOKEN>
+Content-Type: application/json
+
+{
+  "sourceType": "local-json",
+  "limit": 5
+}
+```
+
+Com `local-json`, o agente interpreta sinais estruturados como variação de latência, adoção de IA, redução de bundle e queda no tempo de detecção de incidentes para produzir manchetes e corpo de notícia antes de publicar os itens na fila.
+
+## Modelagem Principal
 
 ### `users`
 
@@ -104,7 +144,7 @@ O backend usa:
 
 ### `user_preferences`
 
-Relaciona usuario com categorias escolhidas.
+Relaciona usuário com categorias escolhidas.
 
 ### `news`
 
@@ -124,7 +164,7 @@ Relaciona usuario com categorias escolhidas.
 
 ### `user_sessions`
 
-Tabela de sessao usada para permitir logout real com JWT.
+Tabela de sessão usada para permitir logout real com JWT.
 
 - `id`
 - `user_id`
@@ -135,11 +175,11 @@ Tabela de sessao usada para permitir logout real com JWT.
 
 ### `curation_runs`
 
-Registra cada execucao do agente curador, com contadores de processamento.
+Registra cada execução do agente curador, com contadores de processamento.
 
 - `id`
 - `status` - `QUEUED` | `RUNNING` | `COMPLETED` | `PARTIAL` | `FAILED`
-- `source_type` - origem das noticias (ex: `template`)
+- `source_type` - origem das notícias (`template` ou `local-json`)
 - `items_found`
 - `items_queued`
 - `items_processed`
@@ -149,46 +189,46 @@ Registra cada execucao do agente curador, com contadores de processamento.
 - `started_at`
 - `finished_at`
 
-## Estrutura de modulos
+## Estrutura de Módulos
 
-- `auth`: cadastro, login, logout, JWT e sessao
-- `news`: listagem de noticias e filtros
-- `preferences`: categorias disponiveis
-- `users`: preferencias do usuario autenticado
-- `queue`: configuracao das filas BullMQ (Redis)
-- `curation`: agente curador, enriquecimento de noticias, processors BullMQ
-- `ai`: servico de resumo com IA
+- `auth`: cadastro, login, logout, JWT e sessões
+- `news`: listagem de notícias e filtros
+- `preferences`: categorias disponíveis
+- `users`: preferências do usuário autenticado
+- `queue`: configuração das filas BullMQ (Redis)
+- `curation`: agente curador, enrichment e processors BullMQ
+- `ai`: serviço de resumo com IA
 - `health`: health check do banco
-- `common`: paginacao, decorators, exceptions, validacoes e contratos compartilhados
+- `common`: paginação, decorators, exceptions, validações, interceptors e contratos compartilhados
 
-## Arquitetura de diretorios
+## Arquitetura de Diretórios
 
 ```text
 src/
-|-- common/          # decorators, exceptions, pagination, validation e contratos
-|-- config/          # app config, validacao de env, swagger
-|-- core/            # filtros e guards globais
+|-- common/          # decorators, exceptions, interceptors, pagination, validation e contratos
+|-- config/          # app config, validação de env, swagger
+|-- core/            # pipes, filtros e guards globais
 |-- database/        # PrismaService, DatabaseModule, repository base
 |-- modules/
-|   |-- ai/          # provider strategy para resumo
-|   |-- auth/        # login, logout, JWT e sessoes
-|   |-- curation/    # agente, enrichment e processors BullMQ
+|   |-- ai/          # providers e seleção do resumidor
+|   |-- auth/        # login, logout, JWT e sessões
+|   |-- curation/    # run, sources, enrichment e processing
 |   |-- health/      # health check
-|   |-- news/        # listagem e persistencia de noticias
-|   |-- preferences/ # categorias disponiveis
+|   |-- news/        # listagem e persistência de notícias
+|   |-- preferences/ # categorias disponíveis
 |   |-- queue/       # filas e contratos de mensageria
-|   `-- users/       # perfil e preferencias do usuario
+|   `-- users/       # perfil e preferências do usuário
 |-- app.module.ts    # bootstrap HTTP
-|-- main.ts          # inicializacao da API
+|-- main.ts          # inicialização da API
 |-- worker.module.ts # bootstrap do worker
-`-- worker.ts        # inicializacao do worker
+`-- worker.ts        # inicialização do worker
 ```
 
-## Variaveis de ambiente
+## Variáveis de Ambiente
 
 Use o arquivo `.env.example` como base.
 
-Variaveis principais:
+Principais variáveis:
 
 ```env
 NODE_ENV=development
@@ -209,22 +249,22 @@ REDIS_PORT=6379
 
 AI_PROVIDER=mock
 OPENAI_API_KEY=""
-OPENAI_MODEL="gpt-4o-mini"
+OPENAI_MODEL=""
 ANTHROPIC_API_KEY=""
-ANTHROPIC_MODEL="claude-3-5-haiku-latest"
+ANTHROPIC_MODEL=""
 OPENROUTER_API_KEY=""
-OPENROUTER_MODEL="google/gemini-2.0-flash-exp:free"
+OPENROUTER_MODEL=""
 ```
 
-Observacao sobre ferramentas:
+Observações:
 
-- a versao do `pnpm` esta fixada em `package.json` no campo `packageManager`
-- isso garante que ambiente local, CI e Docker usem a mesma versao do gerenciador
-- esse ajuste evita incompatibilidade entre a imagem Node 20 e versoes mais novas do `pnpm`
+- a versão do `pnpm` está fixada em `package.json` no campo `packageManager`
+- isso garante que ambiente local, CI e Docker usem a mesma versão do gerenciador
+- no Docker, `REDIS_HOST` é sobrescrito para `redis`
 
-## Como rodar localmente
+## Como Rodar Localmente
 
-### 1. Instalar dependencias
+### 1. Instalar dependências
 
 ```bash
 pnpm install
@@ -232,9 +272,9 @@ pnpm install
 
 ### 2. Criar o `.env`
 
-Copie os valores de `backend/.env.example` para `backend/.env`.
+Copie `backend/.env.example` para `backend/.env`.
 
-### 3. Subir banco e redis
+### 3. Subir banco e Redis
 
 ```bash
 docker compose up -d postgres redis
@@ -264,7 +304,7 @@ pnpm start:dev
 pnpm start:worker
 ```
 
-## Como rodar com Docker Compose
+## Como Rodar com Docker Compose
 
 ```bash
 docker compose up --build
@@ -272,7 +312,7 @@ docker compose up --build
 
 O compose sobe 4 containers: `api`, `worker`, `postgres` e `redis`.
 
-Observacao: se estiver subindo tudo pela primeira vez, ainda e necessario aplicar migration e seed no banco:
+Se estiver subindo tudo pela primeira vez, ainda é necessário aplicar migration e seed:
 
 ```bash
 docker compose exec api pnpm prisma migrate dev
@@ -282,95 +322,49 @@ docker compose exec api pnpm prisma:seed
 No ambiente Docker:
 
 - a API e o worker usam `postgres` e `redis` como hosts internos da rede do compose
-- no ambiente local fora do Docker, o `.env` usa `localhost` para acesso ao Redis e ao Postgres publicados na maquina host
+- fora do Docker, o `.env` usa `localhost`
 
-## Documentacao da API
+## Documentação da API
 
 Com a API rodando:
 
 - Swagger: `http://localhost:3333/docs`
 
-Para teste manual do fluxo completo, use o arquivo:
+Para teste manual do fluxo completo, use:
 
 - `backend/http/curation-flow.http`
 
-## Endpoints principais
+## Endpoints Principais
 
-### Publicos
+### Públicos
 
 - `GET /health`
+- `GET /news`
 - `POST /users`
 - `POST /login`
 
 ### Protegidos por JWT
 
-- `GET /me` - perfil do usuario autenticado
+- `GET /me`
 - `POST /logout`
-- `GET /news`
 - `GET /preferences`
 - `GET /users/me/preferences`
 - `PUT /users/me/preferences`
-- `POST /curation/run` - inicia uma execucao de curadoria
-- `GET /curation/runs/:id` - consulta o progresso de uma execucao
+- `POST /curation/run`
+- `GET /curation/runs/:id`
 
-## Exemplos de uso
+## Exemplos de Uso
 
-Os exemplos abaixo tambem estao organizados no arquivo `backend/http/curation-flow.http`, que testa o fluxo completo do backend.
-
-### Cadastro
-
-```http
-POST /users
-Content-Type: application/json
-
-{
-  "name": "Jane Doe",
-  "email": "jane.doe@example.com",
-  "password": "strong-password",
-  "confirmPassword": "strong-password"
-}
-```
-
-### Login
-
-```http
-POST /login
-Content-Type: application/json
-
-{
-  "email": "jane.doe@example.com",
-  "password": "strong-password"
-}
-```
-
-### Perfil do usuario autenticado
-
-```http
-GET /me
-Authorization: Bearer <TOKEN>
-```
-
-### Noticias com filtro por periodo
+### Notícias com filtro por período
 
 ```http
 GET /news?page=1&limit=10&period=week
-Authorization: Bearer <TOKEN>
 ```
 
-### Atualizar preferencias do usuario
+Observações:
 
-```http
-PUT /users/me/preferences
-Authorization: Bearer <TOKEN>
-Content-Type: application/json
-
-{
-  "categoryIds": [
-    "<CATEGORY_ID_1>",
-    "<CATEGORY_ID_2>"
-  ]
-}
-```
+- `GET /news` é pública, como pedido no requisito essencial do desafio
+- autenticação continua obrigatória apenas para perfil, preferências e disparo da curadoria
 
 ### Disparar curadoria
 
@@ -380,10 +374,15 @@ Authorization: Bearer <TOKEN>
 Content-Type: application/json
 
 {
-  "sourceType": "template",
+  "sourceType": "local-json",
   "limit": 5
 }
 ```
+
+Valores aceitos em `sourceType`:
+
+- `template`
+- `local-json`
 
 ### Acompanhar progresso da curadoria
 
@@ -392,43 +391,30 @@ GET /curation/runs/<RUN_ID>
 Authorization: Bearer <TOKEN>
 ```
 
-O worker processa a descoberta e o enriquecimento de forma assincrona.
-Consulte o status repetidamente ate ver `status: "COMPLETED"` ou `"PARTIAL"`.
+O worker processa a descoberta e o enriquecimento de forma assíncrona. Consulte o status repetidamente até ver `COMPLETED` ou `PARTIAL`.
 
-## Fluxo de teste manual
+Se `AI_PROVIDER=openrouter` estiver configurado, o consumidor usa o provider real para gerar o resumo antes de salvar a notícia no banco.
 
-O arquivo `backend/http/curation-flow.http` cobre o fluxo completo da aplicacao:
+## Fluxo de Teste Manual
 
-1. cadastro de usuario
-2. login
-3. perfil do usuario (`GET /me`)
-4. consulta de noticias antes da curadoria
-5. disparo de curadoria
-6. consulta de status da execucao
-7. noticias apos processamento
+O arquivo `backend/http/curation-flow.http` cobre o fluxo completo da aplicação:
 
-Basta abrir no VS Code com a extensao REST Client e executar as chamadas em sequencia.
-
-Antes de rodar, garanta que:
-
-- a API esta em execucao
-- o banco ja recebeu as migrations
-- o seed foi executado
-
-Se quiser estender o roteiro manual, uma sequencia util e:
-
-1. login
-2. listar categorias em `GET /preferences`
-3. consultar `GET /users/me/preferences`
-4. atualizar preferencias do usuario
-5. consultar noticias autenticadas
-6. consultar noticias com filtro por categoria
-7. fazer logout
-8. validar rota bloqueada apos logout
+1. health check
+2. consulta pública de notícias
+3. filtro por período
+4. cadastro
+5. login
+6. perfil autenticado
+7. preferências
+8. curadoria `template`
+9. curadoria `local-json`
+10. status das execuções
+11. notícias após processamento
+12. logout
 
 ## Testes
 
-O backend agora conta com uma suíte de testes unitários cobrindo as regras de negócio mais críticas.
+O backend conta com testes unitários cobrindo as regras de negócio mais críticas.
 
 Cobertura principal atual:
 
@@ -439,49 +425,35 @@ Cobertura principal atual:
 - `CurationRunDomain`
 - `CurationAgentService`
 - `TemplateNewsSource`
+- `LocalJsonNewsSource`
 - `NewsEnrichmentService`
 - `AiService`
 - providers de IA (`mock`, `openai`, `anthropic`, `openrouter`)
 - processors BullMQ (`CurationRunProcessor` e `NewsProcessingProcessor`)
 
-Os testes unitários ficam ao lado do código em `src/**/*.spec.ts`.
-Esse projeto usa essa organização porque ela facilita manutenção, refactor e leitura da regra testada junto da implementação.
-
-A pasta `test/` continua reservada para testes e2e e configurações específicas desse tipo de suíte.
-
 Resultado atual da suíte unitária:
 
-- `15` suites passando
-- `50` testes passando
+- `18` suítes passando
+- `58` testes passando
 
 Comandos:
 
 ```bash
-pnpm test -- --runInBand
-pnpm test:cov -- --runInBand
-pnpm test:e2e
-```
-
-Observacao:
-
-- os testes unitários usam mocks pesados para isolar regras de negócio
-- os e2e continuam sendo o próximo nível natural para validar integração HTTP + banco + fila
-
-## Comandos uteis
-
-```bash
-pnpm build
-pnpm start:dev
-pnpm start:worker
-pnpm prisma generate
-pnpm prisma migrate dev
-pnpm prisma:seed
 pnpm test
 pnpm test:cov
 pnpm test:e2e
 ```
 
-## Arquitetura do fluxo de curadoria
+## Boas Práticas Aplicadas
+
+- `ValidationPipe` global
+- `JwtAuthGuard` global com `@Public()` para rotas abertas
+- `ThrottlerGuard` global com limites específicos em rotas sensíveis
+- `ParseUUIDPipe` em `GET /curation/runs/:id`
+- interceptor de logging nas rotas de curadoria
+- exception filter para exceções de domínio
+
+## Arquitetura do Fluxo de Curadoria
 
 ```text
 POST /curation/run
@@ -493,8 +465,8 @@ POST /curation/run
        v
    CurationRunProcessor (worker)
    |-- Marca run como RUNNING
-   |-- CurationAgentService descobre noticias
-   |-- Deduplica itens, persiste itemsQueued
+   |-- CurationAgentService descobre notícias (`template` | `local-json`)
+   |-- Deduplica itens e persiste itemsQueued
    `-- Publica 1 job por item em "news-processing"
        |
        v
@@ -502,19 +474,19 @@ POST /curation/run
    |-- Resolve categoria
    |-- AiService.summarize() -> resumo (mock | OpenAI | Anthropic | OpenRouter)
    |-- Detecta sentimento e extrai entidades
-   |-- Salva no banco (NewsRepository.upsertCuratedNews)
-   `-- Atualiza contadores da run (itemsProcessed / itemsSaved / itemsFailed)
+   |-- Salva no banco
+   `-- Atualiza contadores da run
        |
        v
    Run finaliza: COMPLETED | PARTIAL | FAILED
 ```
 
-## Observacoes finais
+## Observações Finais
 
 - o backend compila com `pnpm build`
-- o seed cria categorias e noticias de exemplo para desenvolvimento
-- a autenticacao ja esta pronta para o frontend consumir
+- o seed cria categorias e notícias de exemplo para desenvolvimento
+- a autenticação já está pronta para o frontend consumir
 - a curadoria roda em worker separado com BullMQ + Redis
-- a API dispara execucoes de curadoria e o worker processa descoberta e enriquecimento das noticias
-- o resumo com IA e plugavel via variavel `AI_PROVIDER`
-- se a IA externa falhar, o sistema faz fallback automatico para resumo local
+- a API dispara execuções de curadoria e o worker processa descoberta e enriquecimento das notícias
+- o resumo com IA é plugável via variável `AI_PROVIDER`
+- se a IA externa falhar, o sistema faz fallback automático para resumo local

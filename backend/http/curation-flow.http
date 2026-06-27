@@ -13,7 +13,7 @@
 GET {{baseUrl}}/health
 
 ###
-# Rota protegida sem token (deve retornar 401)
+# Noticias publicas sem token
 GET {{baseUrl}}/news
 
 ###
@@ -67,11 +67,14 @@ Content-Type: application/json
 ###
 # Noticias antes da curadoria
 GET {{baseUrl}}/news?page=1&limit=10
-Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ###
-# Disparar curadoria
-# @name runCuration
+# Noticias publicas filtradas por periodo (requisito essencial do PDF)
+GET {{baseUrl}}/news?page=1&limit=10&period=week
+
+###
+# Disparar curadoria com templates deterministicos
+# @name runTemplateCuration
 POST {{baseUrl}}/curation/run
 Authorization: Bearer {{login.response.body.$.accessToken}}
 Content-Type: application/json
@@ -82,22 +85,43 @@ Content-Type: application/json
 }
 
 ###
-# Status da execucao
-GET {{baseUrl}}/curation/runs/{{runCuration.response.body.$.id}}
+# Disparar curadoria high-code a partir de sinais locais em JSON
+# Recomendado para demonstrar o requisito obrigatorio do agente no PDF.
+# @name runLocalJsonCuration
+POST {{baseUrl}}/curation/run
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "sourceType": "local-json",
+  "limit": 5
+}
+
+###
+# Status da execucao template
+GET {{baseUrl}}/curation/runs/{{runTemplateCuration.response.body.$.id}}
 Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ###
-# (Aguarde 2-5s e rode o status novamente ate COMPLETED ou PARTIAL)
+# Status da execucao local-json
+GET {{baseUrl}}/curation/runs/{{runLocalJsonCuration.response.body.$.id}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+###
+# (Aguarde 2-5s e rode os status novamente ate COMPLETED ou PARTIAL)
+# Se OPENROUTER estiver configurado, o consumidor deve gerar summaries reais no worker.
 
 ###
 # Noticias apos curadoria
-GET {{baseUrl}}/news?page=1&limit=10
-Authorization: Bearer {{login.response.body.$.accessToken}}
+GET {{baseUrl}}/news?page=3&limit=10
+
+###
+# Noticias apos curadoria filtradas por periodo
+GET {{baseUrl}}/news?page=1&limit=10&period=week
 
 ###
 # Noticias filtradas por categoria
 GET {{baseUrl}}/news?page=1&limit=10&category=artificial-intelligence
-Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ###
 # Logout
@@ -105,6 +129,5 @@ POST {{baseUrl}}/logout
 Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ###
-# Rota protegida apos logout (deve retornar 401)
+# Noticias continuam publicas apos logout
 GET {{baseUrl}}/news
-Authorization: Bearer {{login.response.body.$.accessToken}}
