@@ -19,7 +19,10 @@ export function Match<T>(
         validate(value: unknown, args: ValidationArguments) {
           const [relatedPropertyName] = args.constraints;
 
-          return value === (args.object as Record<string, unknown>)[relatedPropertyName];
+          return (
+            value ===
+            (args.object as Record<string, unknown>)[relatedPropertyName]
+          );
         },
       },
     });

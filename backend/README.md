@@ -1,6 +1,6 @@
 # Newsletter Inteligente - Backend
 
-API REST desenvolvida em NestJS para o desafio da Newsletter Inteligente.
+API REST + Worker assíncrono desenvolvidos em NestJS para o desafio da Newsletter Inteligente.
 
 O foco essencial pedido no enunciado para o backend era:
 
@@ -9,7 +9,10 @@ O foco essencial pedido no enunciado para o backend era:
 - suportar filtro por periodo `day|week|month`
 - persistir notícias e categorias em banco
 
-Hoje este backend entrega esse núcleo e também já inclui parte dos itens bônus, como autenticação e preferências do usuário.
+Hoje este backend entrega esse núcleo e também inclui os itens bônus:
+autenticação com JWT, preferências do usuário, agente curador high-code
+rodando em worker separado com mensageria BullMQ/Redis, e resumo automático
+com IA plugável (mock, OpenAI, Anthropic).
 
 ## Stack
 
@@ -18,6 +21,7 @@ Hoje este backend entrega esse núcleo e também já inclui parte dos itens bôn
 - Prisma
 - PostgreSQL
 - Redis
+- BullMQ
 - Docker Compose
 
 ## Decisoes tecnicas
@@ -70,15 +74,13 @@ O backend usa:
 - `GET /users/me/preferences`
 - `PUT /users/me/preferences`
 - proteção das rotas privadas com JWT
-
-### Ainda fora deste serviço
-
-Os pontos abaixo fazem parte do desafio completo, mas ainda não estão implementados neste backend:
-
-- agente curador separado
-- mensageria com produtor/consumidor
-- resumo com IA
-- testes automatizados completos
+- agente curador high-code rodando em worker separado
+- mensageria assíncrona com BullMQ + Redis (2 filas)
+- consumidor que enriquece notícias com resumo via IA
+- provedor de IA plugável: `mock`, `openai`, `anthropic`, `openrouter`
+- fallback automático para resumo local se a IA falhar
+- `GET /curation/runs/:id` para acompanhar progresso da curadoria
+- rastreamento de itens processados, salvos e com falha por execução
 
 ## Modelagem principal
 
@@ -131,15 +133,35 @@ Tabela de sessão usada para permitir logout real com JWT.
 - `created_at`
 - `updated_at`
 
+### `curation_runs`
+
+Registra cada execução do agente curador, com contadores de processamento.
+
+- `id`
+- `status` — `QUEUED` | `RUNNING` | `COMPLETED` | `PARTIAL` | `FAILED`
+- `source_type` — origem das notícias (ex: `template`)
+- `items_found`
+- `items_queued`
+- `items_processed`
+- `items_saved`
+- `items_failed`
+- `error_message`
+- `started_at`
+- `finished_at`
+
 ## Estrutura de modulos
 
 - `auth`: cadastro, login, logout, JWT e sessão
 - `news`: listagem de notícias e filtros
 - `preferences`: categorias disponíveis
 - `users`: preferências do usuário autenticado
+- `queue`: configuração das filas BullMQ (Redis)
+- `curation`: agente curador, enriquecimento de notícias, processadores BullMQ
+- `ai`: serviço de resumo com IA (mock, OpenAI, Anthropic)
+- `health`: health check do banco
 - `common`: paginação, decorators, exceptions e validações compartilhadas
 
-## Variaveis de ambiente
+## Variáveis de ambiente
 
 Use o arquivo `.env.example` como base.
 
@@ -159,9 +181,23 @@ DATABASE_URL="postgresql://postgres:postgres@localhost:5433/newsletter_db?schema
 JWT_SECRET="dev_secret_change_later"
 JWT_EXPIRES_IN="1d"
 
-REDIS_HOST=redis
+REDIS_HOST=localhost
 REDIS_PORT=6379
+
+AI_PROVIDER=mock                   # mock | openai | anthropic | openrouter
+OPENAI_API_KEY=""
+OPENAI_MODEL="gpt-4o-mini"
+ANTHROPIC_API_KEY=""
+ANTHROPIC_MODEL="claude-3-5-haiku-latest"
+OPENROUTER_API_KEY=""              # https://openrouter.ai/keys
+OPENROUTER_MODEL="google/gemini-2.0-flash-exp:free"
 ```
+
+Observação sobre ferramentas:
+
+- a versão do `pnpm` está fixada em `package.json` no campo `packageManager`
+- isso garante que ambiente local, CI e Docker usem a mesma versão do gerenciador
+- esse ajuste é importante para evitar incompatibilidade entre a imagem Node 20 e versões mais novas do `pnpm`
 
 ## Como rodar localmente
 
@@ -199,13 +235,31 @@ pnpm prisma:seed
 pnpm start:dev
 ```
 
+### 7. Rodar o worker (em outro terminal)
+
+```bash
+pnpm start:worker
+```
+
 ## Como rodar com Docker Compose
 
 ```bash
 docker compose up --build
 ```
 
-Observação: se estiver subindo tudo pela primeira vez, ainda é necessário aplicar migration e seed no banco.
+O compose sobe 4 containers: `api`, `worker`, `postgres` e `redis`.
+
+Observação: se estiver subindo tudo pela primeira vez, ainda é necessário aplicar migration e seed no banco:
+
+```bash
+docker compose exec api pnpm prisma migrate dev
+docker compose exec api pnpm prisma:seed
+```
+
+No ambiente Docker:
+
+- a API e o worker usam `postgres` e `redis` como hosts internos da rede do compose
+- no ambiente local fora do Docker, o `.env` usa `localhost` para acesso ao Redis e ao Postgres publicados na máquina host
 
 ## Documentação da API
 
@@ -213,9 +267,9 @@ Com a API rodando:
 
 - Swagger: `http://localhost:3333/docs`
 
-Para teste manual do fluxo completo, o caminho mais prático deste projeto é usar o arquivo:
+Para teste manual do fluxo completo, use o arquivo:
 
-- `backend/http/auth-complete-flow.http`
+- `backend/http/curation-flow.http`
 
 ## Endpoints principais
 
@@ -228,15 +282,18 @@ Para teste manual do fluxo completo, o caminho mais prático deste projeto é us
 
 ### Protegidos por JWT
 
+- `GET /me` — perfil do usuário autenticado
 - `POST /logout`
 - `GET /news`
 - `GET /preferences`
 - `GET /users/me/preferences`
 - `PUT /users/me/preferences`
+- `POST /curation/run` — inicia uma execução de curadoria
+- `GET /curation/runs/:id` — consulta o progresso de uma execução
 
 ## Exemplos de uso
 
-Os exemplos abaixo também estão organizados no arquivo `backend/http/auth-complete-flow.http`, que pode ser usado para testar o backend do início ao fim.
+Os exemplos abaixo também estão organizados no arquivo `backend/http/curation-flow.http`, que testa o fluxo completo do backend.
 
 ### Cadastro
 
@@ -264,6 +321,13 @@ Content-Type: application/json
 }
 ```
 
+### Perfil do usuário autenticado
+
+```http
+GET /me
+Authorization: Bearer <TOKEN>
+```
+
 ### Notícias com filtro por período
 
 ```http
@@ -286,34 +350,48 @@ Content-Type: application/json
 }
 ```
 
+### Disparar curadoria
+
+```http
+POST /curation/run
+Authorization: Bearer <TOKEN>
+Content-Type: application/json
+
+{
+  "sourceType": "template",
+  "limit": 5
+}
+```
+
+### Acompanhar progresso da curadoria
+
+```http
+GET /curation/runs/<RUN_ID>
+Authorization: Bearer <TOKEN>
+```
+
+O worker processa a descoberta e o enriquecimento de forma assíncrona.
+Consulte o status repetidamente até ver `status: "COMPLETED"` ou `"PARTIAL"`.
+
 ## Fluxo de teste manual
 
-O usuário pode testar o backend diretamente pelo arquivo:
+O arquivo `backend/http/curation-flow.http` cobre o fluxo completo da aplicação:
 
-- `backend/http/auth-complete-flow.http`
+1. cadastro de usuário
+2. login
+3. perfil do usuário (`GET /me`)
+4. consulta de notícias antes da curadoria
+5. disparo de curadoria
+6. consulta de status da execução
+7. notícias após processamento
 
-Esse é o fluxo recomendado para validar a API manualmente.
+Basta abrir no VS Code com a extensão REST Client e executar as chamadas em sequência.
 
-Se estiver usando VS Code, basta abrir o arquivo com uma extensão compatível com requests HTTP, como REST Client, e executar as chamadas em sequência.
-
-O arquivo já traz variáveis prontas para teste:
-
-- `@baseUrl = http://localhost:3333`
-- `@userName = User teste`
-- `@userEmail = userteste@teste.com`
-- `@userPassword = strong-password`
-
-Antes de rodar o fluxo, garanta que:
+Antes de rodar, garanta que:
 
 - a API está em execução
 - o banco já recebeu as migrations
-- o seed foi executado, para que existam categorias disponíveis em `/preferences`
-
-Esse arquivo cobre:
-
-- acesso público
-- tentativa sem token
-- cadastro
+- o seed foi executado
 - login
 - listagem de categorias disponíveis em `GET /preferences`
 - listagem de preferências
@@ -327,7 +405,8 @@ Esse arquivo cobre:
 
 ```bash
 pnpm build
-pnpm start:dev
+pnpm start:dev          # API
+pnpm start:worker       # Worker BullMQ (em terminal separado)
 pnpm prisma generate
 pnpm prisma migrate dev
 pnpm prisma:seed
@@ -335,9 +414,40 @@ pnpm test
 pnpm test:e2e
 ```
 
+## Arquitetura do fluxo de curadoria
+
+```
+POST /curation/run
+       │
+       ▼
+   Cria CurationRun (QUEUED)
+   Publica job em "curation-run"
+       │
+       ▼
+   CurationRunProcessor (worker)
+   ├── Marca run como RUNNING
+   ├── CurationAgentService descobre notícias
+   ├── Deduplica itens, persiste itemsQueued
+   └── Publica 1 job por item em "news-processing"
+       │
+       ▼
+   NewsProcessingProcessor (worker)
+   ├── Resolve categoria
+   ├── AiService.summarize() → resumo (mock | OpenAI | Anthropic)
+   ├── Detecta sentimento e extrai entidades
+   ├── Salva no banco (NewsRepository.upsertCuratedNews)
+   └── Atualiza contadores da run (itemsProcessed / itemsSaved / itemsFailed)
+       │
+       ▼
+   Run finaliza: COMPLETED | PARTIAL | FAILED
+```
+
 ## Observações finais
 
 - o backend compila com `pnpm build`
 - o seed cria categorias e notícias de exemplo para desenvolvimento
 - a autenticação já está pronta para o frontend consumir
-- o próximo passo natural do desafio, no backend, é o agente curador separado
+- a curadoria roda em worker separado com BullMQ + Redis
+- a API dispara execuções de curadoria e o worker processa a descoberta e o enriquecimento das notícias
+- o resumo com IA é plugável via variável `AI_PROVIDER` (mock, openai, anthropic, openrouter)
+- se a IA externa falhar, o sistema faz fallback automático para resumo local

@@ -4,21 +4,20 @@
 @userPassword = strong-password
 
 ###
-# Publico: raiz
-GET {{baseUrl}}/
+# Antes de executar:
+# 1. docker compose up (ou postgres + redis + api + worker)
+# 2. Migration e seed aplicados
 
 ###
-# Publico: health check
+# Health check
 GET {{baseUrl}}/health
 
 ###
-# Protegido: deve retornar 401 sem token
+# Rota protegida sem token (deve retornar 401)
 GET {{baseUrl}}/news
 
 ###
-# Cadastro
-# Se este usuario ja existir, a API deve retornar 409.
-# Nesse caso, siga com o login abaixo.
+# Cadastro (roda uma vez; se ja existir, a API retorna 409)
 # @name register
 POST {{baseUrl}}/users
 Content-Type: application/json
@@ -42,15 +41,18 @@ Content-Type: application/json
 }
 
 ###
-# Lista categorias/preferencias disponiveis
+# Perfil do usuario autenticado
+GET {{baseUrl}}/me
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+###
+# Listar categorias disponiveis
 # @name listAvailablePreferences
 GET {{baseUrl}}/preferences
 Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ###
-# Atualiza preferencias do usuario autenticado
-# Usa as 2 primeiras categorias retornadas por /preferences
-# @name updateMyPreferences
+# Atualizar preferencias do usuario
 PUT {{baseUrl}}/users/me/preferences
 Authorization: Bearer {{login.response.body.$.accessToken}}
 Content-Type: application/json
@@ -63,27 +65,46 @@ Content-Type: application/json
 }
 
 ###
-# Consulta preferencias atuais do usuario
-GET {{baseUrl}}/users/me/preferences
+# Noticias antes da curadoria
+GET {{baseUrl}}/news?page=1&limit=10
 Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ###
-# Consulta noticias autenticado
-GET {{baseUrl}}/news?page=1&limit=10&period=week
+# Disparar curadoria
+# @name runCuration
+POST {{baseUrl}}/curation/run
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "sourceType": "template",
+  "limit": 5
+}
+
+###
+# Status da execucao
+GET {{baseUrl}}/curation/runs/{{runCuration.response.body.$.id}}
 Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ###
-# Consulta noticias autenticado com filtro por categoria
-GET {{baseUrl}}/news?page=1&limit=10&category={{listAvailablePreferences.response.body.$[0].slug}}
+# (Aguarde 2-5s e rode o status novamente ate COMPLETED ou PARTIAL)
+
+###
+# Noticias apos curadoria
+GET {{baseUrl}}/news?page=1&limit=10
 Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ###
-# Logout da sessao atual
-# @name logout
+# Noticias filtradas por categoria
+GET {{baseUrl}}/news?page=1&limit=10&category=artificial-intelligence
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+###
+# Logout
 POST {{baseUrl}}/logout
 Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ###
-# Protegido: deve retornar 401 apos logout
+# Rota protegida apos logout (deve retornar 401)
 GET {{baseUrl}}/news
 Authorization: Bearer {{login.response.body.$.accessToken}}

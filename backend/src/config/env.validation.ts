@@ -16,8 +16,12 @@ export const envValidationSchema = Joi.object({
   REDIS_PORT: Joi.number().default(6379),
 
   AI_PROVIDER: Joi.string()
-    .valid('mock', 'openai', 'anthropic')
+    .valid('mock', 'openai', 'anthropic', 'openrouter')
     .default('mock'),
-  AI_API_KEY: Joi.string().allow('').optional(),
+  OPENAI_API_KEY: Joi.string().allow('').optional(),
+  OPENAI_MODEL: Joi.string().allow('').optional(),
   ANTHROPIC_API_KEY: Joi.string().allow('').optional(),
+  ANTHROPIC_MODEL: Joi.string().allow('').optional(),
+  OPENROUTER_API_KEY: Joi.string().allow('').optional(),
+  OPENROUTER_MODEL: Joi.string().allow('').optional(),
 });

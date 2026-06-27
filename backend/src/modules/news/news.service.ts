@@ -37,7 +37,7 @@ export class NewsService {
       total,
     });
   }
-  
+
   private getPublishedAtFrom(period?: NewsPeriod): Date | undefined {
     if (!period) {
       return undefined;

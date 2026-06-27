@@ -6,6 +6,9 @@ services:
     container_name: newsletter_api
     env_file:
       - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
+      REDIS_HOST: redis
     ports:
       - '${PORT}:${PORT}'
     volumes:
@@ -18,11 +21,29 @@ services:
         condition: service_started
     command: pnpm start:dev
 
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: newsletter_worker
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
+      REDIS_HOST: redis
+    volumes:
+      - .:/app
+      - api_node_modules:/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    command: pnpm start:worker
+
   postgres:
     image: postgres:17-alpine
     container_name: newsletter_db
-    env_file:
-      - .env
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}

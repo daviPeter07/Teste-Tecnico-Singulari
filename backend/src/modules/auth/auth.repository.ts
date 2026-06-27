@@ -32,6 +32,12 @@ export class AuthRepository extends PrismaRepository {
     });
   }
 
+  findUserById(id: string) {
+    return this.prismaService.user.findUnique({
+      where: { id },
+    });
+  }
+
   createSession(params: CreateSessionParams) {
     return this.prismaService.userSession.create({
       data: params,
