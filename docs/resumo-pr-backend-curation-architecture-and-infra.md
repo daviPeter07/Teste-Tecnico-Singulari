@@ -112,6 +112,42 @@ Com isso:
 - a regra de negócio da run fica separada da camada de banco
 - fica mais fácil testar transições e contratos da mensageria
 
+### Consolidação do tipo CuratedNewsItem nos contratos
+
+O tipo `CuratedNewsItem` foi movido de `modules/curation/types/` para `common/contracts/`, eliminando a dependência invertida em que `common/` importava de `modules/`.
+
+Arquivos principais:
+
+- `backend/src/common/contracts/curated-news-item.type.ts`
+- `backend/src/common/contracts/curation-job.contract.ts`
+- `backend/src/modules/curation/sources/template-news.source.ts`
+
+Arquivos removidos:
+
+- `backend/src/modules/curation/types/curated-news-item.type.ts`
+
+Com isso:
+
+- a hierarquia de dependências fica correta: `modules → common`, nunca o contrário
+- todos os contratos de mensageria ficam co-locados em `common/contracts/`
+
+### Configuração de CORS com origem explícita
+
+O CORS passou a ser configurado com `origin`, `methods`, `allowedHeaders` e `credentials` explícitos, controlados pela variável `CORS_ORIGIN`.
+
+Arquivos principais:
+
+- `backend/src/main.ts`
+- `backend/src/config/app.config.ts`
+- `backend/src/config/env.validation.ts`
+- `backend/.env.example`
+
+Com isso:
+
+- em desenvolvimento, `CORS_ORIGIN=*` mantém tudo aberto
+- em produção, basta configurar a origem real (aceita múltiplas origens separadas por vírgula)
+- `credentials` é ativado automaticamente quando a origem não é wildcard
+
 ### Ajuste de dependências
 
 O pacote `prisma` CLI foi movido de `dependencies` para `devDependencies`.
@@ -150,16 +186,22 @@ Foram adicionados ou ajustados:
 - `0238852` `refactor(backend): remove redundant root app endpoint`
 - `38a3ebe` `refactor(backend): inject active AI provider through module DI`
 - `1e3f005` `refactor(backend): decouple curation workflow contracts and run state`
+- `21d04de` `refactor(backend): move CuratedNewsItem type to common contracts`
+- `a721a48` `feat(backend): configure CORS with explicit origin from env`
 - `2622b2a` `chore(backend): move prisma cli to devDependencies`
 - `acdf9fd` `docs(backend): refresh architecture and testing guidance`
 
 ## Arquivos alterados no PR
 
+- `backend/.env.example`
 - `backend/README.md`
 - `backend/package.json`
 - `backend/src/app.module.ts`
+- `backend/src/config/app.config.ts`
 - `backend/src/config/config-module.factory.ts`
+- `backend/src/config/env.validation.ts`
 - `backend/src/database/prisma.service.ts`
+- `backend/src/main.ts`
 - `backend/src/modules/ai/ai.module.ts`
 - `backend/src/modules/ai/ai.service.ts`
 - `backend/src/modules/curation/curation-agent.service.ts`
@@ -168,11 +210,13 @@ Foram adicionados ou ajustados:
 - `backend/src/modules/curation/curation-run.domain.ts`
 - `backend/src/modules/curation/processors/curation-run.processor.ts`
 - `backend/src/modules/curation/processors/news-processing.processor.ts`
+- `backend/src/modules/curation/sources/template-news.source.ts`
 - `backend/src/modules/health/health.module.ts`
 - `backend/src/modules/health/health.repository.ts`
 - `backend/src/modules/health/health.service.ts`
 - `backend/src/modules/preferences/preferences.repository.ts`
 - `backend/src/modules/queue/queue.service.ts`
+- `backend/src/common/contracts/curated-news-item.type.ts`
 - `backend/src/common/contracts/curation-job.contract.ts`
 - `backend/src/common/contracts/curation-run-job.contract.ts`
 
@@ -182,6 +226,7 @@ Arquivos removidos:
 - `backend/src/app.service.ts`
 - `backend/src/modules/curation/dto/curation-job.dto.ts`
 - `backend/src/modules/curation/dto/curation-run-job.dto.ts`
+- `backend/src/modules/curation/types/curated-news-item.type.ts`
 - `backend/test/app.e2e-spec.ts`
 
 ## Resultado final deste PR
@@ -194,6 +239,8 @@ Ao final deste PR, o backend passa a ter:
 - menos ruído estrutural no app raiz
 - seleção de provider de IA mais desacoplada
 - fluxo de curadoria mais modular, com contratos e regras de negócio melhor separados
+- contratos de mensageria e tipos compartilhados centralizados em `common/contracts/`
+- CORS configurado com origem explícita via variável de ambiente
 - documentação mais consistente com o estado atual do projeto
 
 ## Observações rápidas
@@ -201,4 +248,4 @@ Ao final deste PR, o backend passa a ter:
 - não foi adicionado rate limiting neste PR
 - `GET /health` continua sendo o endpoint publico principal
 - os ajustes foram focados em arquitetura, manutenção e testabilidade
-- a validação principal executada durante o trabalho foi `pnpm exec tsc -p tsconfig.build.json --noEmit`
+- a validação principal executada durante o trabalho foi `pnpm build`
