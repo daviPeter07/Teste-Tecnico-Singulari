@@ -8,6 +8,8 @@ import { CurationController } from './curation.controller';
 import { CurationRepository } from './curation.repository';
 import { CurationService } from './curation.service';
 import { NewsEnrichmentService } from './news-enrichment.service';
+import { CurationRunProcessor } from './processors/curation-run.processor';
+import { NewsProcessingProcessor } from './processors/news-processing.processor';
 import { TemplateNewsSource } from './sources/template-news.source';
 
 @Module({
@@ -18,6 +20,8 @@ import { TemplateNewsSource } from './sources/template-news.source';
     CurationService,
     CurationRepository,
     NewsEnrichmentService,
+    CurationRunProcessor,
+    NewsProcessingProcessor,
     TemplateNewsSource,
   ],
   exports: [

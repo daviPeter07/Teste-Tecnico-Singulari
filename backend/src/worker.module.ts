@@ -7,8 +7,6 @@ import { AiModule } from './modules/ai/ai.module';
 import { CurationModule } from './modules/curation/curation.module';
 import { NewsModule } from './modules/news/news.module';
 import { QueueModule } from './modules/queue/queue.module';
-import { CurationRunProcessor } from './modules/curation/processors/curation-run.processor';
-import { NewsProcessingProcessor } from './modules/curation/processors/news-processing.processor';
 
 @Module({
   imports: [
@@ -26,6 +24,5 @@ import { NewsProcessingProcessor } from './modules/curation/processors/news-proc
     NewsModule,
     CurationModule,
   ],
-  providers: [CurationRunProcessor, NewsProcessingProcessor],
 })
 export class WorkerModule {}

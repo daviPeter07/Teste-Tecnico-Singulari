@@ -23,7 +23,7 @@ export class QueueService {
       QUEUE_JOB_NAMES.REQUEST_CURATION_RUN,
       params,
       {
-        jobId: `curation-run:${params.runId}`,
+        jobId: `curation-run-${params.runId}`,
         removeOnComplete: 100,
         removeOnFail: 100,
         attempts: 3,
@@ -69,9 +69,10 @@ export class QueueService {
   }
 
   private buildNewsProcessingJobId(params: CurationJobDto) {
-    const stableKey =
-      params.item.url ?? `${params.item.title}:${params.item.publishedAt}`;
+    const stableKey = (
+      params.item.url ?? `${params.item.title}-${params.item.publishedAt}`
+    ).replace(/:/g, '-');
 
-    return `news-item:${params.runId}:${stableKey}`;
+    return `news-item-${params.runId}-${stableKey}`;
   }
 }
