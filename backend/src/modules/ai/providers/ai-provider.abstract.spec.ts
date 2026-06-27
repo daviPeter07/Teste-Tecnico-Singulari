@@ -21,7 +21,9 @@ describe('AiProvider', () => {
     // Garante que o template method nao interfere quando o provider concreto funciona normalmente.
     const provider = new SuccessfulProvider();
 
-    await expect(provider.summarize('conteudo')).resolves.toBe('summary:conteudo');
+    await expect(provider.summarize('conteudo')).resolves.toBe(
+      'summary:conteudo',
+    );
   });
 
   it('falls back to the local mock summarizer when the provider throws', async () => {

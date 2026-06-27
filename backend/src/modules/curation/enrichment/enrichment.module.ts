@@ -1,7 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AiModule } from '../../ai/ai.module';
 import { AiService } from '../../ai/ai.service';
-import { ENTITY_EXTRACTOR, SENTIMENT_ANALYZER, SUMMARIZER } from './enrichment.tokens';
+import {
+  ENTITY_EXTRACTOR,
+  SENTIMENT_ANALYZER,
+  SUMMARIZER,
+} from './enrichment.tokens';
 import { NewsEnrichmentService } from './news-enrichment.service';
 import { RegexEntityExtractorService } from './regex-entity-extractor.service';
 import { RuleBasedSentimentAnalyzerService } from './rule-based-sentiment-analyzer.service';

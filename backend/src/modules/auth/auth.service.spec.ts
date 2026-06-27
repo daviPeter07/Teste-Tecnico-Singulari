@@ -45,8 +45,9 @@ describe('AuthService', () => {
   >;
 
   const bcryptHashMock = bcrypt.hash as jest.MockedFunction<typeof bcrypt.hash>;
-  const bcryptCompareMock =
-    bcrypt.compare as jest.MockedFunction<typeof bcrypt.compare>;
+  const bcryptCompareMock = bcrypt.compare as jest.MockedFunction<
+    typeof bcrypt.compare
+  >;
   const randomUUIDMock = randomUUID as jest.MockedFunction<typeof randomUUID>;
 
   beforeEach(() => {
@@ -79,7 +80,7 @@ describe('AuthService', () => {
 
   it('rejects registration when the email is already in use', async () => {
     // Garante que o cadastro falha quando o email ja pertence a outro usuario.
-    authRepository.findUserByEmail.mockResolvedValue(user as never);
+    authRepository.findUserByEmail.mockResolvedValue(user);
 
     await expect(
       service.register({
@@ -95,9 +96,9 @@ describe('AuthService', () => {
 
   it('registers a new user, opens a session and returns the auth payload', async () => {
     // Cobre o fluxo completo de cadastro: hash da senha, criacao do usuario, token e sessao persistida.
-    authRepository.findUserByEmail.mockResolvedValue(null as never);
+    authRepository.findUserByEmail.mockResolvedValue(null);
     bcryptHashMock.mockResolvedValue('hashed-password' as never);
-    authRepository.createUser.mockResolvedValue(user as never);
+    authRepository.createUser.mockResolvedValue(user);
 
     const result = await service.register({
       name: user.name,
@@ -129,9 +130,9 @@ describe('AuthService', () => {
 
   it('fails registration when the signed token cannot be decoded into a session expiration', async () => {
     // Evita salvar uma sessao quando o token gerado nao possui expiracao valida.
-    authRepository.findUserByEmail.mockResolvedValue(null as never);
+    authRepository.findUserByEmail.mockResolvedValue(null);
     bcryptHashMock.mockResolvedValue('hashed-password' as never);
-    authRepository.createUser.mockResolvedValue(user as never);
+    authRepository.createUser.mockResolvedValue(user);
     jwtService.decode.mockReturnValue(null);
 
     await expect(
@@ -148,7 +149,7 @@ describe('AuthService', () => {
 
   it('rejects login when the email is unknown', async () => {
     // Cobre o caso em que o usuario nem existe, sem chegar na comparacao com bcrypt.
-    authRepository.findUserByEmail.mockResolvedValue(null as never);
+    authRepository.findUserByEmail.mockResolvedValue(null);
 
     await expect(
       service.signIn({ email: user.email, password: 'strong-password' }),
@@ -159,7 +160,7 @@ describe('AuthService', () => {
 
   it('rejects login when the password does not match the stored hash', async () => {
     // Garante erro de credenciais quando a senha informada nao bate com o hash salvo.
-    authRepository.findUserByEmail.mockResolvedValue(user as never);
+    authRepository.findUserByEmail.mockResolvedValue(user);
     bcryptCompareMock.mockResolvedValue(false as never);
 
     await expect(
@@ -169,7 +170,7 @@ describe('AuthService', () => {
 
   it('creates a fresh session when login succeeds', async () => {
     // Garante que cada login bem-sucedido cria uma nova sessao revogavel.
-    authRepository.findUserByEmail.mockResolvedValue(user as never);
+    authRepository.findUserByEmail.mockResolvedValue(user);
     bcryptCompareMock.mockResolvedValue(true as never);
 
     const result = await service.signIn({
@@ -202,7 +203,7 @@ describe('AuthService', () => {
 
   it('returns the authenticated profile when the user still exists', async () => {
     // Garante que o GET /me busca o usuario no banco e nao depende so do payload do token.
-    authRepository.findUserById.mockResolvedValue(user as never);
+    authRepository.findUserById.mockResolvedValue(user);
 
     const result = await service.getProfile({
       id: user.id,
@@ -222,7 +223,7 @@ describe('AuthService', () => {
 
   it('fails GET /me when the user was deleted after the token was issued', async () => {
     // Impede que a API retorne um perfil stale quando o usuario ja foi removido.
-    authRepository.findUserById.mockResolvedValue(null as never);
+    authRepository.findUserById.mockResolvedValue(null);
 
     await expect(
       service.getProfile({

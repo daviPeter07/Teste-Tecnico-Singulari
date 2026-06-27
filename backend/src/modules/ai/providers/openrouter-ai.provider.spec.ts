@@ -6,7 +6,7 @@ describe('OpenRouterAiProvider', () => {
 
   beforeEach(() => {
     fetchMock.mockReset();
-    global.fetch = fetchMock as unknown as typeof fetch;
+    global.fetch = fetchMock;
   });
 
   it('returns the first choice message content from OpenRouter', async () => {
@@ -14,7 +14,8 @@ describe('OpenRouterAiProvider', () => {
     const configService = {
       get: jest.fn((key: string) => {
         if (key === 'ai.openRouterApiKey') return 'openrouter-key';
-        if (key === 'ai.openRouterModel') return 'google/gemini-2.0-flash-exp:free';
+        if (key === 'ai.openRouterModel')
+          return 'google/gemini-2.0-flash-exp:free';
         return undefined;
       }),
     } as unknown as ConfigService;
@@ -24,7 +25,7 @@ describe('OpenRouterAiProvider', () => {
       json: jest.fn().mockResolvedValue({
         choices: [{ message: { content: 'resumo openrouter' } }],
       }),
-    } as never);
+    });
 
     const provider = new OpenRouterAiProvider(configService);
 

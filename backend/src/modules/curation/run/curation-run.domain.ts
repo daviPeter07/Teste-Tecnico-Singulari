@@ -16,9 +16,7 @@ export class CurationRunDomain {
     return run.itemsQueued > 0 && run.itemsProcessed >= run.itemsQueued;
   }
 
-  getFinalStatus(
-    run: Pick<CurationRunProgress, 'itemsFailed' | 'itemsSaved'>,
-  ) {
+  getFinalStatus(run: Pick<CurationRunProgress, 'itemsFailed' | 'itemsSaved'>) {
     if (run.itemsFailed === 0) {
       return CurationRunStatus.COMPLETED;
     }

@@ -6,7 +6,7 @@ describe('AnthropicAiProvider', () => {
 
   beforeEach(() => {
     fetchMock.mockReset();
-    global.fetch = fetchMock as unknown as typeof fetch;
+    global.fetch = fetchMock;
   });
 
   it('joins Anthropic text blocks into a final summary', async () => {
@@ -27,11 +27,13 @@ describe('AnthropicAiProvider', () => {
           { type: 'text', text: 'anthropic' },
         ],
       }),
-    } as never);
+    });
 
     const provider = new AnthropicAiProvider(configService);
 
-    await expect(provider.summarize('conteudo')).resolves.toBe('resumo anthropic');
+    await expect(provider.summarize('conteudo')).resolves.toBe(
+      'resumo anthropic',
+    );
   });
 
   it('falls back to the local summarizer when Anthropic is not configured', async () => {

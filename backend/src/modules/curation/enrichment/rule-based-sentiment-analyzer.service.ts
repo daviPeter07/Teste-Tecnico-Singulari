@@ -3,9 +3,7 @@ import { NewsSentiment } from '../../../../generated/prisma/enums';
 import type { SentimentAnalyzerContract } from './contracts/sentiment-analyzer.contract';
 
 @Injectable()
-export class RuleBasedSentimentAnalyzerService
-  implements SentimentAnalyzerContract
-{
+export class RuleBasedSentimentAnalyzerService implements SentimentAnalyzerContract {
   detectSentiment(content: string) {
     const normalizedContent = content.toLowerCase();
     const positiveTerms = [

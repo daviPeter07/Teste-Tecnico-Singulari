@@ -6,7 +6,7 @@ describe('OpenAiProvider', () => {
 
   beforeEach(() => {
     fetchMock.mockReset();
-    global.fetch = fetchMock as unknown as typeof fetch;
+    global.fetch = fetchMock;
   });
 
   it('returns the OpenAI summary when the API answers with output_text', async () => {
@@ -22,7 +22,7 @@ describe('OpenAiProvider', () => {
     fetchMock.mockResolvedValue({
       ok: true,
       json: jest.fn().mockResolvedValue({ output_text: 'resumo openai' }),
-    } as never);
+    });
 
     const provider = new OpenAiProvider(configService);
 

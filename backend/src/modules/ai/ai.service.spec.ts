@@ -11,7 +11,9 @@ describe('AiService', () => {
 
     const service = new AiService(provider);
 
-    await expect(service.summarize('raw content')).resolves.toBe('provider-summary');
+    await expect(service.summarize('raw content')).resolves.toBe(
+      'provider-summary',
+    );
     expect(provider.summarize).toHaveBeenCalledWith('raw content');
   });
 });

@@ -22,7 +22,9 @@ describe('QueueService', () => {
 
   it('publishes the parent curation job with retry and retention policies', async () => {
     // Verifica que o job pai usa um jobId estavel e configura retry e retencao corretamente.
-    curationRunQueue.add.mockResolvedValue({ id: 'curation-run-run-1' } as never);
+    curationRunQueue.add.mockResolvedValue({
+      id: 'curation-run-run-1',
+    } as never);
 
     await service.enqueueCurationRunJob({
       runId: 'run-1',

@@ -70,7 +70,7 @@ describe('UsersService', () => {
 
   it('rejects preference reads when the user does not exist', async () => {
     // Mantem o contrato explicito de erro quando o usuario nao existe.
-    usersRepository.findById.mockResolvedValue(null as never);
+    usersRepository.findById.mockResolvedValue(null);
 
     await expect(service.findMyPreferences(userId)).rejects.toBeInstanceOf(
       UserNotFoundException,
@@ -80,7 +80,7 @@ describe('UsersService', () => {
   it('validates all category ids before replacing user preferences', async () => {
     // Evita salvar preferencias parcialmente quando existe categoryId invalido no payload.
     usersRepository.findById.mockResolvedValue({ id: userId } as never);
-    preferencesRepository.countByIds.mockResolvedValue(1 as never);
+    preferencesRepository.countByIds.mockResolvedValue(1);
 
     await expect(
       service.updateMyPreferences(userId, {
@@ -96,7 +96,9 @@ describe('UsersService', () => {
     usersRepository.findById.mockResolvedValue({ id: userId } as never);
     usersRepository.replacePreferences.mockResolvedValue([] as never);
 
-    const result = await service.updateMyPreferences(userId, { categoryIds: [] });
+    const result = await service.updateMyPreferences(userId, {
+      categoryIds: [],
+    });
 
     expect(preferencesRepository.countByIds).not.toHaveBeenCalled();
     expect(usersRepository.replacePreferences).toHaveBeenCalledWith(userId, []);
