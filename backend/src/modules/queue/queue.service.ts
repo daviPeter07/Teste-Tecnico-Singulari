@@ -6,8 +6,8 @@ import {
   QUEUE_JOB_NAMES,
 } from './queue.constants';
 import { Queue } from 'bullmq';
-import { CurationJobDto } from '../curation/dto/curation-job.dto';
-import { CurationRunJobDto } from '../curation/dto/curation-run-job.dto';
+import { CurationJobContract } from '../../common/contracts/curation-job.contract';
+import { CurationRunJobContract } from '../../common/contracts/curation-run-job.contract';
 
 @Injectable()
 export class QueueService {
@@ -18,7 +18,7 @@ export class QueueService {
     private readonly newsProcessingQueue: Queue,
   ) {}
 
-  enqueueCurationRunJob(params: CurationRunJobDto) {
+  enqueueCurationRunJob(params: CurationRunJobContract) {
     return this.curationRunQueue.add(
       QUEUE_JOB_NAMES.REQUEST_CURATION_RUN,
       params,
@@ -35,8 +35,8 @@ export class QueueService {
     );
   }
 
-  prepareNewsProcessingJobs(params: CurationJobDto[]) {
-    const jobsById = new Map<string, CurationJobDto>();
+  prepareNewsProcessingJobs(params: CurationJobContract[]) {
+    const jobsById = new Map<string, CurationJobContract>();
 
     for (const job of params) {
       jobsById.set(this.buildNewsProcessingJobId(job), job);
@@ -45,7 +45,7 @@ export class QueueService {
     return Array.from(jobsById.values());
   }
 
-  enqueueNewsProcessingJobs(params: CurationJobDto[]) {
+  enqueueNewsProcessingJobs(params: CurationJobContract[]) {
     const jobs = this.prepareNewsProcessingJobs(params);
 
     if (jobs.length === 0) {
@@ -68,7 +68,7 @@ export class QueueService {
     );
   }
 
-  private buildNewsProcessingJobId(params: CurationJobDto) {
+  private buildNewsProcessingJobId(params: CurationJobContract) {
     const stableKey = (
       params.item.url ?? `${params.item.title}-${params.item.publishedAt}`
     ).replace(/:/g, '-');

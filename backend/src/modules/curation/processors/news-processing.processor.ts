@@ -1,13 +1,15 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
+import { CurationJobContract } from '../../../common/contracts/curation-job.contract';
 import { NewsRepository } from '../../news/news.repository';
+import { PreferencesRepository } from '../../preferences/preferences.repository';
 import {
   NEWS_PROCESSING_QUEUE,
   QUEUE_JOB_NAMES,
 } from '../../queue/queue.constants';
+import { CurationRunDomain } from '../curation-run.domain';
 import { CurationRepository } from '../curation.repository';
-import { CurationJobDto } from '../dto/curation-job.dto';
 import { NewsEnrichmentService } from '../news-enrichment.service';
 
 @Injectable()
@@ -17,13 +19,15 @@ export class NewsProcessingProcessor extends WorkerHost {
 
   constructor(
     private readonly curationRepository: CurationRepository,
+    private readonly preferencesRepository: PreferencesRepository,
     private readonly newsRepository: NewsRepository,
     private readonly newsEnrichmentService: NewsEnrichmentService,
+    private readonly curationRunDomain: CurationRunDomain,
   ) {
     super();
   }
 
-  async process(job: Job<CurationJobDto>) {
+  async process(job: Job<CurationJobContract>) {
     switch (job.name) {
       case QUEUE_JOB_NAMES.PROCESS_NEWS_ITEM:
         return this.processNewsItem(job);
@@ -34,13 +38,13 @@ export class NewsProcessingProcessor extends WorkerHost {
     }
   }
 
-  private async processNewsItem(job: Job<CurationJobDto>) {
+  private async processNewsItem(job: Job<CurationJobContract>) {
     const { runId, item } = job.data;
 
     try {
       const category =
-        (await this.curationRepository.findCategoryBySlug(item.categorySlug)) ??
-        (await this.curationRepository.findFallbackCategory());
+        (await this.preferencesRepository.findBySlug(item.categorySlug)) ??
+        (await this.preferencesRepository.findFallback());
 
       if (!category) {
         throw new Error('No category available to persist curated news.');
@@ -59,7 +63,7 @@ export class NewsProcessingProcessor extends WorkerHost {
         categoryId: category.id,
       });
 
-      const run = await this.curationRepository.registerSavedItem(runId);
+      const run = await this.registerRunProgress(runId, 'saved');
       await job.updateProgress(
         run.itemsQueued > 0
           ? Math.round((run.itemsProcessed / run.itemsQueued) * 100)
@@ -75,8 +79,9 @@ export class NewsProcessingProcessor extends WorkerHost {
       const isLastAttempt = job.attemptsMade + 1 >= maxAttempts;
 
       if (isLastAttempt) {
-        const run = await this.curationRepository.registerFailedItem(
+        const run = await this.registerRunProgress(
           runId,
+          'failed',
           error instanceof Error
             ? error.message
             : 'Unknown news processing error',
@@ -91,5 +96,28 @@ export class NewsProcessingProcessor extends WorkerHost {
 
       throw error;
     }
+  }
+
+  private async registerRunProgress(
+    runId: string,
+    outcome: 'saved' | 'failed',
+    errorMessage?: string,
+  ) {
+    const run =
+      outcome === 'saved'
+        ? await this.curationRepository.registerSavedItem(runId)
+        : await this.curationRepository.registerFailedItem(
+            runId,
+            errorMessage ?? 'Unknown news processing error',
+          );
+
+    if (!this.curationRunDomain.shouldFinalize(run)) {
+      return run;
+    }
+
+    return this.curationRepository.finalizeRun(
+      runId,
+      this.curationRunDomain.getFinalStatus(run),
+    );
   }
 }
