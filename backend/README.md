@@ -428,13 +428,44 @@ Se quiser estender o roteiro manual, uma sequencia util e:
 
 ## Testes
 
-Neste momento o foco do projeto esta no fluxo funcional do desafio e na organizacao da codebase para facilitar a cobertura automatizada.
+O backend agora conta com uma suíte de testes unitários cobrindo as regras de negócio mais críticas.
 
-Os proximos testes naturais para adicionar sao:
+Cobertura principal atual:
 
-- unitarios para `AiService`, `NewsService` e `CurationRunDomain`
-- integracao para repositories principais com banco de teste
-- e2e para autenticacao, preferencias, listagem de noticias e disparo da curadoria
+- `AuthService`
+- `UsersService`
+- `CurationService`
+- `QueueService`
+- `CurationRunDomain`
+- `CurationAgentService`
+- `TemplateNewsSource`
+- `NewsEnrichmentService`
+- `AiService`
+- providers de IA (`mock`, `openai`, `anthropic`, `openrouter`)
+- processors BullMQ (`CurationRunProcessor` e `NewsProcessingProcessor`)
+
+Os testes unitários ficam ao lado do código em `src/**/*.spec.ts`.
+Esse projeto usa essa organização porque ela facilita manutenção, refactor e leitura da regra testada junto da implementação.
+
+A pasta `test/` continua reservada para testes e2e e configurações específicas desse tipo de suíte.
+
+Resultado atual da suíte unitária:
+
+- `15` suites passando
+- `50` testes passando
+
+Comandos:
+
+```bash
+pnpm test -- --runInBand
+pnpm test:cov -- --runInBand
+pnpm test:e2e
+```
+
+Observacao:
+
+- os testes unitários usam mocks pesados para isolar regras de negócio
+- os e2e continuam sendo o próximo nível natural para validar integração HTTP + banco + fila
 
 ## Comandos uteis
 
@@ -446,6 +477,7 @@ pnpm prisma generate
 pnpm prisma migrate dev
 pnpm prisma:seed
 pnpm test
+pnpm test:cov
 pnpm test:e2e
 ```
 
