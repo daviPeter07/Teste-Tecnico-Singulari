@@ -5,7 +5,9 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -14,16 +16,20 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { seconds, Throttle } from '@nestjs/throttler';
+import { RequestLoggingInterceptor } from '../../../common/interceptors/request-logging.interceptor';
 import { RunCurationDto } from './dto/run-curation.dto';
 import { CurationService } from './curation.service';
 
 @ApiTags('Curation')
 @ApiBearerAuth('jwt')
+@UseInterceptors(RequestLoggingInterceptor)
 @Controller('curation')
 export class CurationController {
   constructor(private readonly curationService: CurationService) {}
 
   @Post('run')
+  @Throttle({ default: { limit: 5, ttl: seconds(60) } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Start a curation run',
@@ -46,7 +52,7 @@ export class CurationController {
   @ApiOkResponse({
     description: 'Current curation run state and counters',
   })
-  findRunById(@Param('id') id: string) {
+  findRunById(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.curationService.findRunById(id);
   }
 }

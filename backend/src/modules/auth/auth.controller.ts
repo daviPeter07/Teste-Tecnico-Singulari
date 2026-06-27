@@ -14,6 +14,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { seconds, Throttle } from '@nestjs/throttler';
 import { CurrentUser } from '../../common/auth/current-user.decorator';
 import { Public } from '../../common/auth/public.decorator';
 import type { AuthenticatedUser } from '../../common/auth/authenticated-user.type';
@@ -31,6 +32,7 @@ export class AuthController {
 
   @Public()
   @Post('users')
+  @Throttle({ default: { limit: 5, ttl: seconds(60) } })
   @ApiOperation({ summary: 'Register user account' })
   @ApiCreatedResponse({
     description: 'Registered user and access token',
@@ -42,6 +44,7 @@ export class AuthController {
 
   @Public()
   @Post('login')
+  @Throttle({ default: { limit: 10, ttl: seconds(60) } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Authenticate user' })
   @ApiOkResponse({
