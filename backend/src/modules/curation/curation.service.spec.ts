@@ -1,9 +1,9 @@
 import { NotFoundException } from '@nestjs/common';
 import { QueueService } from '../queue/queue.service';
-import { CurationRepository } from './curation.repository';
-import { CurationService } from './curation.service';
+import { CurationRepository } from './run/curation.repository';
+import { CurationService } from './run/curation.service';
 
-jest.mock('./curation.repository', () => ({
+jest.mock('./run/curation.repository', () => ({
   CurationRepository: class CurationRepository {},
 }));
 

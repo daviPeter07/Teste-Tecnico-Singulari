@@ -2,11 +2,11 @@ import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { CurationRunStatus } from '../../../../generated/prisma/enums';
 import { QueueService } from '../../queue/queue.service';
-import { CurationAgentService } from '../curation-agent.service';
-import { CurationRepository } from '../curation.repository';
+import { CurationAgentService } from '../sources/curation-agent.service';
+import { CurationRepository } from '../run/curation.repository';
 import { CurationRunProcessor } from './curation-run.processor';
 
-jest.mock('../curation.repository', () => ({
+jest.mock('../run/curation.repository', () => ({
   CurationRepository: class CurationRepository {},
 }));
 

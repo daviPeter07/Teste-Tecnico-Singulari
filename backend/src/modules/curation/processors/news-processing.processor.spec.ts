@@ -2,9 +2,9 @@ import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { NewsRepository } from '../../news/news.repository';
 import { PreferencesRepository } from '../../preferences/preferences.repository';
-import { CurationRunDomain } from '../curation-run.domain';
-import { CurationRepository } from '../curation.repository';
-import { NewsEnrichmentService } from '../news-enrichment.service';
+import { NewsEnrichmentService } from '../enrichment/news-enrichment.service';
+import { CurationRunDomain } from '../run/curation-run.domain';
+import { CurationRepository } from '../run/curation.repository';
 import { NewsProcessingProcessor } from './news-processing.processor';
 
 jest.mock('../../news/news.repository', () => ({
@@ -15,7 +15,7 @@ jest.mock('../../preferences/preferences.repository', () => ({
   PreferencesRepository: class PreferencesRepository {},
 }));
 
-jest.mock('../curation.repository', () => ({
+jest.mock('../run/curation.repository', () => ({
   CurationRepository: class CurationRepository {},
 }));
 

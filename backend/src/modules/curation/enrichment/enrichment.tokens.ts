@@ -1,0 +1,3 @@
+export const SUMMARIZER = Symbol('SUMMARIZER');
+export const SENTIMENT_ANALYZER = Symbol('SENTIMENT_ANALYZER');
+export const ENTITY_EXTRACTOR = Symbol('ENTITY_EXTRACTOR');

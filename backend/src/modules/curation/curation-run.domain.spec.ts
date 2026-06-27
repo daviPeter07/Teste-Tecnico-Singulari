@@ -1,5 +1,5 @@
 import { CurationRunStatus } from '../../../generated/prisma/enums';
-import { CurationRunDomain } from './curation-run.domain';
+import { CurationRunDomain } from './run/curation-run.domain';
 
 describe('CurationRunDomain', () => {
   let domain: CurationRunDomain;

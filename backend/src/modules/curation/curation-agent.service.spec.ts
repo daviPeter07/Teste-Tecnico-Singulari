@@ -1,4 +1,4 @@
-import { CurationAgentService } from './curation-agent.service';
+import { CurationAgentService } from './sources/curation-agent.service';
 import { TemplateNewsSource } from './sources/template-news.source';
 
 describe('CurationAgentService', () => {
