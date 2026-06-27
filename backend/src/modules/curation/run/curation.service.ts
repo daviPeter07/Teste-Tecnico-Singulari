@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CurationRepository } from './curation.repository';
+import { QueueService } from '../../queue/queue.service';
 import { RunCurationDto } from './dto/run-curation.dto';
-import { QueueService } from '../queue/queue.service';
+import { CurationRepository } from './curation.repository';
 
 @Injectable()
 export class CurationService {

@@ -8,9 +8,9 @@ import {
   NEWS_PROCESSING_QUEUE,
   QUEUE_JOB_NAMES,
 } from '../../queue/queue.constants';
-import { CurationRunDomain } from '../curation-run.domain';
-import { CurationRepository } from '../curation.repository';
-import { NewsEnrichmentService } from '../news-enrichment.service';
+import { NewsEnrichmentService } from '../enrichment/news-enrichment.service';
+import { CurationRunDomain } from '../run/curation-run.domain';
+import { CurationRepository } from '../run/curation.repository';
 
 @Injectable()
 @Processor(NEWS_PROCESSING_QUEUE)

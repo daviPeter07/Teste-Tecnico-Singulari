@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { TemplateNewsSource } from './sources/template-news.source';
-import { CurationRunJobContract } from '../../common/contracts/curation-run-job.contract';
+import { CurationRunJobContract } from '../../../common/contracts/curation-run-job.contract';
+import { TemplateNewsSource } from './template-news.source';
 
 @Injectable()
 export class CurationAgentService {

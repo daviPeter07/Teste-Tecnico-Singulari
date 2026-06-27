@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CurationRunStatus } from '../../../generated/prisma/enums';
+import { CurationRunStatus } from '../../../../generated/prisma/enums';
 
 type CurationRunProgress = {
   itemsFailed: number;

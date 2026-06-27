@@ -7,9 +7,9 @@ import {
   CURATION_RUN_QUEUE,
   QUEUE_JOB_NAMES,
 } from '../../queue/queue.constants';
-import { CurationAgentService } from '../curation-agent.service';
-import { CurationRepository } from '../curation.repository';
 import { CurationRunJobContract } from '../../../common/contracts/curation-run-job.contract';
+import { CurationAgentService } from '../sources/curation-agent.service';
+import { CurationRepository } from '../run/curation.repository';
 
 @Injectable()
 @Processor(CURATION_RUN_QUEUE)

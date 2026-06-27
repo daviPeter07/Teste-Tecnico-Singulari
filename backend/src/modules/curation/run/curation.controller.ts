@@ -7,15 +7,15 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
-import { CurationService } from './curation.service';
 import {
   ApiBearerAuth,
   ApiOkResponse,
-  ApiParam,
   ApiOperation,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { RunCurationDto } from './dto/run-curation.dto';
+import { CurationService } from './curation.service';
 
 @ApiTags('Curation')
 @ApiBearerAuth('jwt')

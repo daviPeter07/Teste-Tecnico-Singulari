@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { CurationRunStatus } from '../../../generated/prisma/enums';
-import { PrismaRepository } from '../../database/prisma.repository';
-import { PrismaService } from '../../database/prisma.service';
+import { CurationRunStatus } from '../../../../generated/prisma/enums';
+import { PrismaRepository } from '../../../database/prisma.repository';
+import { PrismaService } from '../../../database/prisma.service';
 
 type UpdateRunAfterDiscoveryParams = {
   runId: string;

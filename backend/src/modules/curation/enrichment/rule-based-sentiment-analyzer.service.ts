@@ -1,15 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { NewsSentiment } from '../../../generated/prisma/enums';
-import { AiService } from '../ai/ai.service';
+import { NewsSentiment } from '../../../../generated/prisma/enums';
+import type { SentimentAnalyzerContract } from './contracts/sentiment-analyzer.contract';
 
 @Injectable()
-export class NewsEnrichmentService {
-  constructor(private readonly aiService: AiService) {}
-
-  summarize(content: string) {
-    return this.aiService.summarize(content);
-  }
-
+export class RuleBasedSentimentAnalyzerService implements SentimentAnalyzerContract {
   detectSentiment(content: string) {
     const normalizedContent = content.toLowerCase();
     const positiveTerms = [
@@ -45,12 +39,5 @@ export class NewsEnrichmentService {
     }
 
     return NewsSentiment.NEUTRAL;
-  }
-
-  extractEntities(content: string) {
-    const matches =
-      content.match(/\b[A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*\b/g) ?? [];
-
-    return Array.from(new Set(matches)).slice(0, 5);
   }
 }
