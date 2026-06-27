@@ -77,7 +77,7 @@ O backend usa:
 - agente curador high-code rodando em worker separado
 - mensageria assíncrona com BullMQ + Redis (2 filas)
 - consumidor que enriquece notícias com resumo via IA
-- provedor de IA plugável: `mock`, `openai`, `anthropic`
+- provedor de IA plugável: `mock`, `openai`, `anthropic`, `openrouter`
 - fallback automático para resumo local se a IA falhar
 - `GET /curation/runs/:id` para acompanhar progresso da curadoria
 - rastreamento de itens processados, salvos e com falha por execução
@@ -184,11 +184,13 @@ JWT_EXPIRES_IN="1d"
 REDIS_HOST=localhost
 REDIS_PORT=6379
 
-AI_PROVIDER=mock
+AI_PROVIDER=mock                   # mock | openai | anthropic | openrouter
 OPENAI_API_KEY=""
 OPENAI_MODEL="gpt-4o-mini"
 ANTHROPIC_API_KEY=""
 ANTHROPIC_MODEL="claude-3-5-haiku-latest"
+OPENROUTER_API_KEY=""              # https://openrouter.ai/keys
+OPENROUTER_MODEL="google/gemini-2.0-flash-exp:free"
 ```
 
 Observação sobre ferramentas:
@@ -449,5 +451,5 @@ POST /curation/run
 - a autenticação já está pronta para o frontend consumir
 - a curadoria roda em worker separado com BullMQ + Redis
 - a API dispara execuções de curadoria e o worker processa a descoberta e o enriquecimento das notícias
-- o resumo com IA é plugável via variável `AI_PROVIDER` (mock, openai, anthropic)
+- o resumo com IA é plugável via variável `AI_PROVIDER` (mock, openai, anthropic, openrouter)
 - se a IA externa falhar, o sistema faz fallback automático para resumo local
