@@ -77,6 +77,23 @@ describe('CurationService', () => {
     );
   });
 
+  it('accepts local-json as a valid high-code source for the curation agent', async () => {
+    // Garante que a API consegue enfileirar a fonte local-json como estrategia oficial do agente.
+    curationRepository.createRun.mockResolvedValue({ ...run, sourceType: 'local-json' } as never);
+    queueService.enqueueCurationRunJob.mockResolvedValue({
+      id: 'curation-run-run-1',
+    } as never);
+
+    await service.run({ sourceType: 'local-json', limit: 4 });
+
+    expect(curationRepository.createRun).toHaveBeenCalledWith('local-json');
+    expect(queueService.enqueueCurationRunJob).toHaveBeenCalledWith({
+      runId: run.id,
+      sourceType: 'local-json',
+      limit: 4,
+    });
+  });
+
   it('fails when a requested run id does not exist', async () => {
     // Cobre o endpoint de status quando o cliente consulta um runId inexistente.
     curationRepository.findRunById.mockResolvedValue(null);

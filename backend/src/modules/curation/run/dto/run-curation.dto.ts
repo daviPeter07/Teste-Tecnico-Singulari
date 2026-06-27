@@ -19,9 +19,10 @@ export class RunCurationDto {
   @ApiPropertyOptional({
     example: 'template',
     default: 'template',
-    description: 'Source used by the curation agent',
+    enum: ['template', 'local-json'],
+    description: 'Source used by the curation agent (template or local-json)',
   })
   @IsOptional()
-  @IsIn(['template'])
-  sourceType!: 'template';
+  @IsIn(['template', 'local-json'])
+  sourceType!: 'template' | 'local-json';
 }

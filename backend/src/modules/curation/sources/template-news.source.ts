@@ -77,7 +77,17 @@ export class TemplateNewsSource {
       return accumulator + character.charCodeAt(0);
     }, 0);
 
-    // Keeps publication dates deterministic across retries for the same run.
-    return Date.UTC(2026, 0, 1, 12, 0, 0) + hash * 60_000;
+    const now = new Date();
+    const utcMidday = Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate(),
+      12,
+      0,
+      0,
+    );
+
+    // Keeps publication dates deterministic across retries of the same day while staying recent for period filters.
+    return utcMidday - (hash % (24 * 60)) * 60_000;
   }
 }

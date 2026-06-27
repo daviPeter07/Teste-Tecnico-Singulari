@@ -1,0 +1,62 @@
+[
+  {
+    "slug": "ai-support-copilot",
+    "categorySlug": "artificial-intelligence",
+    "topic": "copilotos para atendimento",
+    "signal": "uso semanal por time de suporte",
+    "currentValue": 78,
+    "previousValue": 51,
+    "unit": "%",
+    "impact": "o salto de adocao indica maturidade operacional e abertura para automatizar respostas com contexto de produto.",
+    "team": "CX Ops",
+    "observedAt": "2026-01-05T09:00:00.000Z"
+  },
+  {
+    "slug": "queue-latency-drop",
+    "categorySlug": "backend",
+    "topic": "filas assicronas em APIs criticas",
+    "signal": "tempo medio de resposta apos mover jobs pesados para workers",
+    "currentValue": 182,
+    "previousValue": 341,
+    "unit": "ms",
+    "impact": "o ganho de latencia mostra efeito direto da separacao entre camada HTTP e processamento em background.",
+    "team": "Platform Engineering",
+    "observedAt": "2026-01-05T11:00:00.000Z"
+  },
+  {
+    "slug": "frontend-bundle-cut",
+    "categorySlug": "frontend",
+    "topic": "componentes server-first",
+    "signal": "reducao do bundle inicial apos migracao parcial para renderizacao hibrida",
+    "currentValue": 31,
+    "previousValue": 18,
+    "unit": "%",
+    "impact": "o corte no bundle reforca a tendencia de mover mais trabalho para o servidor sem perder interatividade.",
+    "team": "Web Platform",
+    "observedAt": "2026-01-04T16:30:00.000Z"
+  },
+  {
+    "slug": "cloud-idle-spend",
+    "categorySlug": "cloud",
+    "topic": "custos ociosos em workloads containerizados",
+    "signal": "reducoes de custo apos politicas automaticas de escala a zero",
+    "currentValue": 24,
+    "previousValue": 9,
+    "unit": "%",
+    "impact": "o indicador aponta espaco real para otimizar ambientes de execucao intermitente com automacao de capacidade.",
+    "team": "Cloud Governance",
+    "observedAt": "2026-01-04T08:45:00.000Z"
+  },
+  {
+    "slug": "devops-incident-detection",
+    "categorySlug": "devops",
+    "topic": "observabilidade em pipelines de producao",
+    "signal": "queda no tempo medio de deteccao depois de adotar tracing distribuido",
+    "currentValue": 14,
+    "previousValue": 32,
+    "unit": "min",
+    "impact": "a reducao no tempo de deteccao sugere ganho operacional concreto com tracing, logs estruturados e alertas por servico.",
+    "team": "SRE",
+    "observedAt": "2026-01-03T19:15:00.000Z"
+  }
+]
