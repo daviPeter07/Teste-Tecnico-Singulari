@@ -103,32 +103,8 @@ export class CurationRepository extends PrismaRepository {
     });
   }
 
-  findCategoryBySlug(slug: string) {
-    return this.prismaService.category.findUnique({
-      where: { slug },
-      select: {
-        id: true,
-        slug: true,
-        name: true,
-      },
-    });
-  }
-
-  findFallbackCategory() {
-    return this.prismaService.category.findFirst({
-      orderBy: {
-        name: 'asc',
-      },
-      select: {
-        id: true,
-        slug: true,
-        name: true,
-      },
-    });
-  }
-
   async registerSavedItem(runId: string) {
-    const run = await this.prismaService.curationRun.update({
+    return this.prismaService.curationRun.update({
       where: {
         id: runId,
       },
@@ -141,12 +117,10 @@ export class CurationRepository extends PrismaRepository {
         },
       },
     });
-
-    return this.finalizeRunIfNeeded(runId, run);
   }
 
   async registerFailedItem(runId: string, errorMessage: string) {
-    const run = await this.prismaService.curationRun.update({
+    return this.prismaService.curationRun.update({
       where: {
         id: runId,
       },
@@ -160,45 +134,17 @@ export class CurationRepository extends PrismaRepository {
         errorMessage,
       },
     });
-
-    return this.finalizeRunIfNeeded(runId, run);
   }
 
-  private async finalizeRunIfNeeded(
-    runId: string,
-    run: {
-      itemsFailed: number;
-      itemsProcessed: number;
-      itemsQueued: number;
-      itemsSaved: number;
-    },
-  ) {
-    if (run.itemsQueued === 0 || run.itemsProcessed < run.itemsQueued) {
-      return this.prismaService.curationRun.findUniqueOrThrow({
-        where: {
-          id: runId,
-        },
-      });
-    }
-
+  finalizeRun(runId: string, status: CurationRunStatus) {
     return this.prismaService.curationRun.update({
       where: {
         id: runId,
       },
       data: {
-        status: this.getFinalStatus(run),
+        status,
         finishedAt: new Date(),
       },
     });
-  }
-
-  private getFinalStatus(run: { itemsFailed: number; itemsSaved: number }) {
-    if (run.itemsFailed === 0) {
-      return CurationRunStatus.COMPLETED;
-    }
-
-    return run.itemsSaved > 0
-      ? CurationRunStatus.PARTIAL
-      : CurationRunStatus.FAILED;
   }
 }

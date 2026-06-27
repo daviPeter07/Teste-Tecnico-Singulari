@@ -25,4 +25,28 @@ export class PreferencesRepository extends PrismaRepository {
       },
     });
   }
+
+  findBySlug(slug: string) {
+    return this.prismaService.category.findUnique({
+      where: { slug },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+      },
+    });
+  }
+
+  findFallback() {
+    return this.prismaService.category.findFirst({
+      orderBy: {
+        name: 'asc',
+      },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+      },
+    });
+  }
 }

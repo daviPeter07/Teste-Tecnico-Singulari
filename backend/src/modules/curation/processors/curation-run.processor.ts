@@ -9,7 +9,7 @@ import {
 } from '../../queue/queue.constants';
 import { CurationAgentService } from '../curation-agent.service';
 import { CurationRepository } from '../curation.repository';
-import { CurationRunJobDto } from '../dto/curation-run-job.dto';
+import { CurationRunJobContract } from '../../../common/contracts/curation-run-job.contract';
 
 @Injectable()
 @Processor(CURATION_RUN_QUEUE)
@@ -24,7 +24,7 @@ export class CurationRunProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<CurationRunJobDto>) {
+  async process(job: Job<CurationRunJobContract>) {
     switch (job.name) {
       case QUEUE_JOB_NAMES.REQUEST_CURATION_RUN:
         return this.processRequestedRun(job);
@@ -35,7 +35,7 @@ export class CurationRunProcessor extends WorkerHost {
     }
   }
 
-  private async processRequestedRun(job: Job<CurationRunJobDto>) {
+  private async processRequestedRun(job: Job<CurationRunJobContract>) {
     const { runId, sourceType } = job.data;
 
     try {
