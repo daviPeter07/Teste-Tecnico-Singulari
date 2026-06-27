@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../database/prisma.service';
+import { HealthRepository } from './health.repository';
 
 type DependencyStatus = 'up' | 'down';
 
 @Injectable()
 export class HealthService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly healthRepository: HealthRepository) {}
 
   //metodo pra exec query e retorna latency
   private async checkDatabase(): Promise<{
@@ -14,13 +14,13 @@ export class HealthService {
   }> {
     const start = Date.now();
     try {
-      await this.prismaService.$queryRaw`SELECT 1`;
+      await this.healthRepository.ping();
 
       return {
         status: 'up',
         latencyMs: Date.now() - start,
       };
-    } catch (error) {
+    } catch {
       return {
         status: 'down',
         latencyMs: Date.now() - start,
