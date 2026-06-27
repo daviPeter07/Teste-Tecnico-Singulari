@@ -6,8 +6,7 @@ import { MockAiProvider } from './providers/mock-ai.provider';
 import { OpenAiProvider } from './providers/openai-ai.provider';
 import { AnthropicAiProvider } from './providers/anthropic-ai.provider';
 import { OpenRouterAiProvider } from './providers/openrouter-ai.provider';
-
-export const AI_PROVIDER = 'AI_PROVIDER';
+import { AI_PROVIDER } from './ai.constants';
 
 @Module({
   imports: [ConfigModule],

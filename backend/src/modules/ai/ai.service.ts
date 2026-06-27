@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { SummarizerContract } from '../curation/enrichment/contracts/summarizer.contract';
 import { AiProvider } from './providers/ai-provider.abstract';
-import { AI_PROVIDER } from './ai.module';
+import { AI_PROVIDER } from './ai.constants';
 
 @Injectable()
 export class AiService implements SummarizerContract {
