@@ -267,9 +267,9 @@ Com a API rodando:
 
 - Swagger: `http://localhost:3333/docs`
 
-Para teste manual do fluxo completo, o caminho mais prático deste projeto é usar o arquivo:
+Para teste manual do fluxo completo, use o arquivo:
 
-- `backend/http/auth-complete-flow.http`
+- `backend/http/curation-flow.http`
 
 ## Endpoints principais
 
@@ -293,7 +293,7 @@ Para teste manual do fluxo completo, o caminho mais prático deste projeto é us
 
 ## Exemplos de uso
 
-Os exemplos abaixo também estão organizados no arquivo `backend/http/auth-complete-flow.http`, que pode ser usado para testar o backend do início ao fim.
+Os exemplos abaixo também estão organizados no arquivo `backend/http/curation-flow.http`, que testa o fluxo completo do backend.
 
 ### Cadastro
 
@@ -375,33 +375,23 @@ Consulte o status repetidamente até ver `status: "COMPLETED"` ou `"PARTIAL"`.
 
 ## Fluxo de teste manual
 
-Os arquivos abaixo cobrem os fluxos de teste manual:
+O arquivo `backend/http/curation-flow.http` cobre o fluxo completo da aplicação:
 
-- `backend/http/auth-complete-flow.http` — cadastro, login, preferências, notícias, logout
-- `backend/http/curation-flow.http` — login, curadoria, consulta de status e notícias após processamento
+1. cadastro de usuário
+2. login
+3. perfil do usuário (`GET /me`)
+4. consulta de notícias antes da curadoria
+5. disparo de curadoria
+6. consulta de status da execução
+7. notícias após processamento
 
-O fluxo recomendado para validar o backend é executar os dois arquivos em sequência.
+Basta abrir no VS Code com a extensão REST Client e executar as chamadas em sequência.
 
-Se estiver usando VS Code, basta abrir o arquivo com uma extensão compatível com requests HTTP, como REST Client, e executar as chamadas em sequência.
-
-O arquivo já traz variáveis prontas para teste:
-
-- `@baseUrl = http://localhost:3333`
-- `@userName = User teste`
-- `@userEmail = userteste@teste.com`
-- `@userPassword = strong-password`
-
-Antes de rodar o fluxo, garanta que:
+Antes de rodar, garanta que:
 
 - a API está em execução
 - o banco já recebeu as migrations
-- o seed foi executado, para que existam categorias disponíveis em `/preferences`
-
-Esse arquivo cobre:
-
-- acesso público
-- tentativa sem token
-- cadastro
+- o seed foi executado
 - login
 - listagem de categorias disponíveis em `GET /preferences`
 - listagem de preferências

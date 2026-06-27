@@ -18,7 +18,8 @@ Content-Type: application/json
 {
   "name": "Test",
   "email": "{{userEmail}}",
-  "password": "{{userPassword}}"
+  "password": "{{userPassword}}",
+  "confirmPassword": "{{userPassword}}"
 }
 
 ###
