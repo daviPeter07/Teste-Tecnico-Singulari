@@ -37,7 +37,9 @@ export class TemplateNewsSource {
         url: `https://frontendnow.example.com/news/react-hybrid-${seed}-3`,
         content:
           'Aplicações modernas em React continuam combinando renderização no servidor, streaming e componentes interativos para melhorar performance e experiência do usuário.',
-        publishedAt: new Date(baseTimestamp - 1000 * 60 * 60 * 12).toISOString(),
+        publishedAt: new Date(
+          baseTimestamp - 1000 * 60 * 60 * 12,
+        ).toISOString(),
         categorySlug: 'frontend',
       },
       {
@@ -47,7 +49,9 @@ export class TemplateNewsSource {
         url: `https://cloudreport.example.com/news/serverless-${seed}-4`,
         content:
           'Workloads web e APIs leves têm migrado para ambientes serverless e containerizados para reduzir custo operacional e simplificar deploy.',
-        publishedAt: new Date(baseTimestamp - 1000 * 60 * 60 * 18).toISOString(),
+        publishedAt: new Date(
+          baseTimestamp - 1000 * 60 * 60 * 18,
+        ).toISOString(),
         categorySlug: 'cloud',
       },
       {
@@ -58,7 +62,9 @@ export class TemplateNewsSource {
         url: `https://devopsradar.example.com/news/observability-${seed}-5`,
         content:
           'Logs estruturados, métricas e tracing estão cada vez mais presentes em pipelines de produção para acelerar diagnóstico e reduzir tempo de resposta a incidentes.',
-        publishedAt: new Date(baseTimestamp - 1000 * 60 * 60 * 24).toISOString(),
+        publishedAt: new Date(
+          baseTimestamp - 1000 * 60 * 60 * 24,
+        ).toISOString(),
         categorySlug: 'devops',
       },
     ];

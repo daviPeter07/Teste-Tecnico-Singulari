@@ -49,7 +49,7 @@ export class CurationRunProcessor extends WorkerHost {
         };
       }
 
-      const items = await this.curationAgentService.discoverNews(job.data);
+      const items = this.curationAgentService.discoverNews(job.data);
       const jobs = this.queueService.prepareNewsProcessingJobs(
         items.map((item) => ({
           runId,

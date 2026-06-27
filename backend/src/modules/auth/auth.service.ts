@@ -74,7 +74,11 @@ export class AuthService {
     });
     const decodedToken = this.jwtService.decode(accessToken);
 
-    if (!decodedToken || typeof decodedToken !== 'object' || !('exp' in decodedToken)) {
+    if (
+      !decodedToken ||
+      typeof decodedToken !== 'object' ||
+      !('exp' in decodedToken)
+    ) {
       throw new InvalidCredentialsException();
     }
 

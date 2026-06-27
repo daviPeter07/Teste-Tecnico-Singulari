@@ -30,7 +30,8 @@ export class UsersService {
     await this.ensureUserExists(userId);
 
     if (categoryIds.length > 0) {
-      const categoriesCount = await this.preferencesRepository.countByIds(categoryIds);
+      const categoriesCount =
+        await this.preferencesRepository.countByIds(categoryIds);
 
       if (categoriesCount !== categoryIds.length) {
         throw new InvalidUserPreferencesException(categoryIds);
