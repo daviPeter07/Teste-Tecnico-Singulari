@@ -40,6 +40,13 @@ export class NewsProcessingProcessor extends WorkerHost {
 
   private async processNewsItem(job: Job<CurationJobContract>) {
     const { runId, item } = job.data;
+    const maxAttempts = job.opts.attempts ?? 1;
+    const currentAttempt = job.attemptsMade + 1;
+    const itemIdentifier = item.url ?? item.title;
+
+    this.logger.log(
+      `Processing news item for run ${runId}: ${itemIdentifier} (attempt ${currentAttempt}/${maxAttempts}).`,
+    );
 
     try {
       const category =
@@ -64,6 +71,10 @@ export class NewsProcessingProcessor extends WorkerHost {
       });
 
       const run = await this.registerRunProgress(runId, 'saved');
+      this.logger.log(
+        `Saved news item for run ${runId} in category ${category.slug}. Progress: ${run.itemsProcessed}/${run.itemsQueued}.`,
+      );
+
       await job.updateProgress(
         run.itemsQueued > 0
           ? Math.round((run.itemsProcessed / run.itemsQueued) * 100)
@@ -75,16 +86,26 @@ export class NewsProcessingProcessor extends WorkerHost {
         categorySlug: category.slug,
       };
     } catch (error) {
-      const maxAttempts = job.opts.attempts ?? 1;
       const isLastAttempt = job.attemptsMade + 1 >= maxAttempts;
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown news processing error';
+
+      if (!isLastAttempt) {
+        this.logger.warn(
+          `News item processing failed for run ${runId} on attempt ${currentAttempt}/${maxAttempts}: ${itemIdentifier}. Retrying. Reason: ${errorMessage}`,
+        );
+      }
 
       if (isLastAttempt) {
         const run = await this.registerRunProgress(
           runId,
           'failed',
-          error instanceof Error
-            ? error.message
-            : 'Unknown news processing error',
+          errorMessage,
+        );
+
+        this.logger.error(
+          `News item processing failed for run ${runId} after ${maxAttempts} attempts: ${itemIdentifier}. Progress: ${run.itemsProcessed}/${run.itemsQueued}. Reason: ${errorMessage}`,
+          error instanceof Error ? error.stack : undefined,
         );
 
         await job.updateProgress(
@@ -115,9 +136,11 @@ export class NewsProcessingProcessor extends WorkerHost {
       return run;
     }
 
-    return this.curationRepository.finalizeRun(
-      runId,
-      this.curationRunDomain.getFinalStatus(run),
+    const status = this.curationRunDomain.getFinalStatus(run);
+    this.logger.log(
+      `Finalizing curation run ${runId} with status ${status}.`,
     );
+
+    return this.curationRepository.finalizeRun(runId, status);
   }
 }

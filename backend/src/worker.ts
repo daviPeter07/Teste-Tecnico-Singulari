@@ -1,10 +1,11 @@
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { WorkerLogger } from './common/logging/worker.logger';
 import { WorkerModule } from './worker.module';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(WorkerModule, {
-    logger: ['error', 'warn', 'log'],
+    logger: new WorkerLogger(),
   });
 
   const logger = new Logger('WorkerBootstrap');
