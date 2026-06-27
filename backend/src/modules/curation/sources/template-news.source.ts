@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CuratedNewsItem } from '../types/curated-news-item.type';
+import { CuratedNewsItem } from '../../../common/contracts/curated-news-item.type';
 
 @Injectable()
 export class TemplateNewsSource {

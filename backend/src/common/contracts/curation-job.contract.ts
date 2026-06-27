@@ -1,4 +1,4 @@
-import { CuratedNewsItem } from '../../modules/curation/types/curated-news-item.type';
+import { CuratedNewsItem } from './curated-news-item.type';
 
 export class CurationJobContract {
   runId!: string;
