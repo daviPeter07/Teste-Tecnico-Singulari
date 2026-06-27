@@ -69,7 +69,7 @@ describe('NewsProcessingProcessor', () => {
       preferencesRepository as unknown as PreferencesRepository,
       newsRepository as unknown as NewsRepository,
       newsEnrichmentService as unknown as NewsEnrichmentService,
-      curationRunDomain as unknown as CurationRunDomain,
+      curationRunDomain,
     );
   });
 
@@ -116,10 +116,12 @@ describe('NewsProcessingProcessor', () => {
       id: 'cat-1',
       slug: 'backend',
       name: 'Backend',
-    } as never);
+    });
     newsEnrichmentService.summarize.mockResolvedValue('resumo pronto');
-    newsEnrichmentService.detectSentiment.mockReturnValue('POSITIVE' as never);
-    newsEnrichmentService.extractEntities.mockReturnValue(['Google Cloud'] as never);
+    newsEnrichmentService.detectSentiment.mockReturnValue('POSITIVE');
+    newsEnrichmentService.extractEntities.mockReturnValue([
+      'Google Cloud',
+    ] as never);
     newsRepository.upsertCuratedNews.mockResolvedValue(undefined as never);
     curationRepository.registerSavedItem.mockResolvedValue({
       itemsQueued: 1,
@@ -128,7 +130,7 @@ describe('NewsProcessingProcessor', () => {
       itemsFailed: 0,
     } as never);
     curationRunDomain.shouldFinalize.mockReturnValue(true);
-    curationRunDomain.getFinalStatus.mockReturnValue('COMPLETED' as never);
+    curationRunDomain.getFinalStatus.mockReturnValue('COMPLETED');
     curationRepository.finalizeRun.mockResolvedValue({
       itemsQueued: 1,
       itemsProcessed: 1,
@@ -154,14 +156,14 @@ describe('NewsProcessingProcessor', () => {
   it('falls back to the alphabetical category when the requested slug does not exist', async () => {
     // Garante fallback de categoria quando o slug da noticia nao existe no banco.
     const job = createJob();
-    preferencesRepository.findBySlug.mockResolvedValue(null as never);
+    preferencesRepository.findBySlug.mockResolvedValue(null);
     preferencesRepository.findFallback.mockResolvedValue({
       id: 'cat-fallback',
       slug: 'artificial-intelligence',
       name: 'AI',
-    } as never);
+    });
     newsEnrichmentService.summarize.mockResolvedValue('resumo pronto');
-    newsEnrichmentService.detectSentiment.mockReturnValue('NEUTRAL' as never);
+    newsEnrichmentService.detectSentiment.mockReturnValue('NEUTRAL');
     newsEnrichmentService.extractEntities.mockReturnValue([] as never);
     newsRepository.upsertCuratedNews.mockResolvedValue(undefined as never);
     curationRepository.registerSavedItem.mockResolvedValue({
@@ -185,9 +187,9 @@ describe('NewsProcessingProcessor', () => {
       id: 'cat-1',
       slug: 'backend',
       name: 'Backend',
-    } as never);
+    });
     newsEnrichmentService.summarize.mockResolvedValue('resumo pronto');
-    newsEnrichmentService.detectSentiment.mockReturnValue('NEUTRAL' as never);
+    newsEnrichmentService.detectSentiment.mockReturnValue('NEUTRAL');
     newsEnrichmentService.extractEntities.mockReturnValue([] as never);
     newsRepository.upsertCuratedNews.mockRejectedValue(processingError);
     curationRepository.registerFailedItem.mockResolvedValue({
@@ -197,7 +199,7 @@ describe('NewsProcessingProcessor', () => {
       itemsFailed: 2,
     } as never);
     curationRunDomain.shouldFinalize.mockReturnValue(true);
-    curationRunDomain.getFinalStatus.mockReturnValue('PARTIAL' as never);
+    curationRunDomain.getFinalStatus.mockReturnValue('PARTIAL');
     curationRepository.finalizeRun.mockResolvedValue({
       itemsQueued: 4,
       itemsProcessed: 4,
@@ -218,10 +220,10 @@ describe('NewsProcessingProcessor', () => {
 
   it('does not mutate run counters on intermediate retries before the last attempt', async () => {
     // Evita contar a mesma falha varias vezes enquanto o BullMQ ainda esta tentando retry.
-    const job = createJob({ attemptsMade: 0, opts: { attempts: 3 } as never });
+    const job = createJob({ attemptsMade: 0, opts: { attempts: 3 } });
 
-    preferencesRepository.findBySlug.mockResolvedValue(null as never);
-    preferencesRepository.findFallback.mockResolvedValue(null as never);
+    preferencesRepository.findBySlug.mockResolvedValue(null);
+    preferencesRepository.findFallback.mockResolvedValue(null);
 
     await expect(processor.process(job)).rejects.toThrow(
       'No category available to persist curated news.',

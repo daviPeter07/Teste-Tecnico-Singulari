@@ -22,7 +22,10 @@ describe('CurationRunProcessor', () => {
     Pick<CurationAgentService, 'discoverNews'>
   >;
   let queueService: jest.Mocked<
-    Pick<QueueService, 'prepareNewsProcessingJobs' | 'enqueueNewsProcessingJobs'>
+    Pick<
+      QueueService,
+      'prepareNewsProcessingJobs' | 'enqueueNewsProcessingJobs'
+    >
   >;
 
   beforeEach(() => {
@@ -113,8 +116,8 @@ describe('CurationRunProcessor', () => {
       finishedAt: null,
       itemsQueued: 0,
     } as never);
-    curationAgentService.discoverNews.mockReturnValue(items as never);
-    queueService.prepareNewsProcessingJobs.mockReturnValue(jobs as never);
+    curationAgentService.discoverNews.mockReturnValue(items);
+    queueService.prepareNewsProcessingJobs.mockReturnValue(jobs);
     curationRepository.updateRunAfterDiscovery.mockResolvedValue({
       itemsQueued: 1,
     } as never);
