@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AiProvider } from './providers/ai-provider.abstract';
 import { MockAiProvider } from './providers/mock-ai.provider';
@@ -7,9 +7,7 @@ import { AnthropicAiProvider } from './providers/anthropic-ai.provider';
 import { OpenRouterAiProvider } from './providers/openrouter-ai.provider';
 
 @Injectable()
-export class AiService implements OnModuleInit {
-  private provider!: AiProvider;
-
+export class AiService {
   constructor(
     private readonly configService: ConfigService,
     private readonly mockAiProvider: MockAiProvider,
@@ -18,7 +16,7 @@ export class AiService implements OnModuleInit {
     private readonly openRouterAiProvider: OpenRouterAiProvider,
   ) {}
 
-  onModuleInit() {
+  async summarize(content: string) {
     const name = this.configService.get<string>('ai.provider') ?? 'mock';
 
     const providers = [
@@ -28,11 +26,9 @@ export class AiService implements OnModuleInit {
       this.openRouterAiProvider,
     ] as const;
 
-    this.provider =
+    const provider: AiProvider =
       providers.find((p) => p.name === name) ?? this.mockAiProvider;
-  }
 
-  async summarize(content: string) {
-    return this.provider.summarize(content);
+    return provider.summarize(content);
   }
 }
