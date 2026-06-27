@@ -1,4 +1,4 @@
-import { RegexEntityExtractorService } from './enrichment/regex-entity-extractor.service';
+import { RegexEntityExtractorService } from './regex-entity-extractor.service';
 
 describe('RegexEntityExtractorService', () => {
   let service: RegexEntityExtractorService;

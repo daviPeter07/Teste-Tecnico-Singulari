@@ -1,8 +1,8 @@
-import { NewsSentiment } from '../../../generated/prisma/enums';
-import { NewsEnrichmentService } from './enrichment/news-enrichment.service';
-import { EntityExtractorContract } from './enrichment/contracts/entity-extractor.contract';
-import { SentimentAnalyzerContract } from './enrichment/contracts/sentiment-analyzer.contract';
-import { SummarizerContract } from './enrichment/contracts/summarizer.contract';
+import { NewsSentiment } from '../../../../generated/prisma/enums';
+import { EntityExtractorContract } from './contracts/entity-extractor.contract';
+import { SentimentAnalyzerContract } from './contracts/sentiment-analyzer.contract';
+import { SummarizerContract } from './contracts/summarizer.contract';
+import { NewsEnrichmentService } from './news-enrichment.service';
 
 describe('NewsEnrichmentService', () => {
   let service: NewsEnrichmentService;
@@ -32,7 +32,9 @@ describe('NewsEnrichmentService', () => {
     // Garante que o service de enriquecimento apenas delega o resumo para o contrato de sumarização.
     summarizer.summarize.mockResolvedValue('resumo pronto');
 
-    await expect(service.summarize('conteudo bruto')).resolves.toBe('resumo pronto');
+    await expect(service.summarize('conteudo bruto')).resolves.toBe(
+      'resumo pronto',
+    );
     expect(summarizer.summarize).toHaveBeenCalledWith('conteudo bruto');
   });
 

@@ -1,5 +1,5 @@
-import { CurationAgentService } from './sources/curation-agent.service';
-import { TemplateNewsSource } from './sources/template-news.source';
+import { CurationAgentService } from './curation-agent.service';
+import { TemplateNewsSource } from './template-news.source';
 
 describe('CurationAgentService', () => {
   let service: CurationAgentService;
@@ -17,7 +17,9 @@ describe('CurationAgentService', () => {
 
   it('delegates template runs to the template news source using limit and run id', () => {
     // Garante que a descoberta usa limit e runId como seed deterministica da fonte template.
-    templateNewsSource.generate.mockReturnValue([{ title: 'generated' }] as never);
+    templateNewsSource.generate.mockReturnValue([
+      { title: 'generated' },
+    ] as never);
 
     const result = service.discoverNews({
       runId: 'run-1',
@@ -34,7 +36,7 @@ describe('CurationAgentService', () => {
     expect(() =>
       service.discoverNews({
         runId: 'run-1',
-        sourceType: 'rss' as never,
+        sourceType: 'rss',
         limit: 3,
       }),
     ).toThrow('Unsupported curation source: rss');

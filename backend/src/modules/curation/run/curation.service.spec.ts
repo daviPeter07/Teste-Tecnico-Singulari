@@ -1,9 +1,9 @@
 import { NotFoundException } from '@nestjs/common';
-import { QueueService } from '../queue/queue.service';
-import { CurationRepository } from './run/curation.repository';
-import { CurationService } from './run/curation.service';
+import { QueueService } from '../../queue/queue.service';
+import { CurationRepository } from './curation.repository';
+import { CurationService } from './curation.service';
 
-jest.mock('./run/curation.repository', () => ({
+jest.mock('./curation.repository', () => ({
   CurationRepository: class CurationRepository {},
 }));
 
@@ -24,9 +24,7 @@ describe('CurationService', () => {
   let curationRepository: jest.Mocked<
     Pick<CurationRepository, 'createRun' | 'markRunAsFailed' | 'findRunById'>
   >;
-  let queueService: jest.Mocked<
-    Pick<QueueService, 'enqueueCurationRunJob'>
-  >;
+  let queueService: jest.Mocked<Pick<QueueService, 'enqueueCurationRunJob'>>;
 
   beforeEach(() => {
     curationRepository = {
@@ -65,11 +63,13 @@ describe('CurationService', () => {
   it('marks the run as failed if publishing to the queue throws', async () => {
     // Garante que a execucao fica como FAILED se o produtor nao conseguir publicar no BullMQ.
     curationRepository.createRun.mockResolvedValue(run as never);
-    queueService.enqueueCurationRunJob.mockRejectedValue(new Error('redis down'));
-
-    await expect(service.run({ sourceType: 'template', limit: 3 })).rejects.toThrow(
-      'redis down',
+    queueService.enqueueCurationRunJob.mockRejectedValue(
+      new Error('redis down'),
     );
+
+    await expect(
+      service.run({ sourceType: 'template', limit: 3 }),
+    ).rejects.toThrow('redis down');
 
     expect(curationRepository.markRunAsFailed).toHaveBeenCalledWith(
       run.id,
@@ -79,7 +79,7 @@ describe('CurationService', () => {
 
   it('fails when a requested run id does not exist', async () => {
     // Cobre o endpoint de status quando o cliente consulta um runId inexistente.
-    curationRepository.findRunById.mockResolvedValue(null as never);
+    curationRepository.findRunById.mockResolvedValue(null);
 
     await expect(service.findRunById('missing-run')).rejects.toBeInstanceOf(
       NotFoundException,
