@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -10,6 +10,7 @@ import {
 import { CurrentUser } from '../../common/auth/current-user.decorator';
 import { Public } from '../../common/auth/public.decorator';
 import type { AuthenticatedUser } from '../../common/auth/authenticated-user.type';
+import { UserResponseDto } from '../users/dto/user-response.dto';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
@@ -55,5 +56,16 @@ export class AuthController {
   })
   signOut(@CurrentUser() user: AuthenticatedUser) {
     return this.authService.signOut(user);
+  }
+
+  @Get('me')
+  @ApiBearerAuth('jwt')
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiOkResponse({
+    description: 'Current user profile',
+    type: UserResponseDto,
+  })
+  getProfile(@CurrentUser() user: AuthenticatedUser) {
+    return this.authService.getProfile(user);
   }
 }

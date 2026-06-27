@@ -10,6 +10,18 @@
 # 4. Garanta que o seed ja foi executado
 
 ###
+# Criar conta (roda uma vez)
+# @name register
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "Test",
+  "email": "{{userEmail}}",
+  "password": "{{userPassword}}"
+}
+
+###
 # Login
 # @name login
 POST {{baseUrl}}/login
@@ -19,6 +31,12 @@ Content-Type: application/json
   "email": "{{userEmail}}",
   "password": "{{userPassword}}"
 }
+
+###
+# Obter perfil do usuario autenticado
+# @name myProfile
+GET {{baseUrl}}/me
+Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ###
 # Conferir noticias antes da curadoria

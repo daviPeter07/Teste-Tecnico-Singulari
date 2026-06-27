@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
@@ -56,6 +56,16 @@ export class AuthService {
     await this.authRepository.revokeSession(user.id, user.sessionId);
 
     return new LogoutResponseDto('Logged out successfully.');
+  }
+
+  async getProfile(user: AuthenticatedUser): Promise<UserResponseDto> {
+    const found = await this.authRepository.findUserById(user.id);
+
+    if (!found) {
+      throw new NotFoundException('User not found');
+    }
+
+    return UserResponseDto.fromEntity(found);
   }
 
   private async createAuthenticatedResponse(user: {

@@ -282,6 +282,7 @@ Para teste manual do fluxo completo, o caminho mais prático deste projeto é us
 
 ### Protegidos por JWT
 
+- `GET /me` — perfil do usuário autenticado
 - `POST /logout`
 - `GET /news`
 - `GET /preferences`
@@ -318,6 +319,13 @@ Content-Type: application/json
   "email": "jane.doe@example.com",
   "password": "strong-password"
 }
+```
+
+### Perfil do usuário autenticado
+
+```http
+GET /me
+Authorization: Bearer <TOKEN>
 ```
 
 ### Notícias com filtro por período
