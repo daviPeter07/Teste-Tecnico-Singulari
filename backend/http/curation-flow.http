@@ -1,22 +1,29 @@
 @baseUrl = http://localhost:3333
+@userName = User teste
 @userEmail = userteste@teste.com
 @userPassword = strong-password
 
 ###
-# Antes de executar este arquivo:
-# 1. Suba postgres e redis
-# 2. Suba a API
-# 3. Suba o worker
-# 4. Garanta que o seed ja foi executado
+# Antes de executar:
+# 1. docker compose up (ou postgres + redis + api + worker)
+# 2. Migration e seed aplicados
 
 ###
-# Criar conta (roda uma vez)
+# Health check
+GET {{baseUrl}}/health
+
+###
+# Rota protegida sem token (deve retornar 401)
+GET {{baseUrl}}/news
+
+###
+# Cadastro (roda uma vez; se ja existir, a API retorna 409)
 # @name register
 POST {{baseUrl}}/users
 Content-Type: application/json
 
 {
-  "name": "Test",
+  "name": "{{userName}}",
   "email": "{{userEmail}}",
   "password": "{{userPassword}}",
   "confirmPassword": "{{userPassword}}"
@@ -34,18 +41,36 @@ Content-Type: application/json
 }
 
 ###
-# Obter perfil do usuario autenticado
-# @name myProfile
+# Perfil do usuario autenticado
 GET {{baseUrl}}/me
 Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ###
-# Conferir noticias antes da curadoria
+# Listar categorias disponiveis
+# @name listAvailablePreferences
+GET {{baseUrl}}/preferences
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+###
+# Atualizar preferencias do usuario
+PUT {{baseUrl}}/users/me/preferences
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "categoryIds": [
+    "{{listAvailablePreferences.response.body.$[0].id}}",
+    "{{listAvailablePreferences.response.body.$[1].id}}"
+  ]
+}
+
+###
+# Noticias antes da curadoria
 GET {{baseUrl}}/news?page=1&limit=10
 Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ###
-# Disparar a curadoria
+# Disparar curadoria
 # @name runCuration
 POST {{baseUrl}}/curation/run
 Authorization: Bearer {{login.response.body.$.accessToken}}
@@ -57,24 +82,29 @@ Content-Type: application/json
 }
 
 ###
-# Consultar status da execucao
+# Status da execucao
 GET {{baseUrl}}/curation/runs/{{runCuration.response.body.$.id}}
 Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ###
-# Aguarde 2-5 segundos para o worker consumir a fila e rode o status novamente.
+# (Aguarde 2-5s e rode o status novamente ate COMPLETED ou PARTIAL)
 
 ###
-# Conferir noticias apos a curadoria
+# Noticias apos curadoria
 GET {{baseUrl}}/news?page=1&limit=10
 Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ###
-# Conferir noticias de IA
+# Noticias filtradas por categoria
 GET {{baseUrl}}/news?page=1&limit=10&category=artificial-intelligence
 Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ###
-# Conferir noticias de backend
-GET {{baseUrl}}/news?page=1&limit=10&category=backend
+# Logout
+POST {{baseUrl}}/logout
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+###
+# Rota protegida apos logout (deve retornar 401)
+GET {{baseUrl}}/news
 Authorization: Bearer {{login.response.body.$.accessToken}}
