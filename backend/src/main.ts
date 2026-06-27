@@ -9,8 +9,14 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('app.port') || 3333;
+  const corsOrigin = configService.get<string>('app.corsOrigin') || '*';
 
-  app.enableCors();
+  app.enableCors({
+    origin: corsOrigin === '*' ? '*' : corsOrigin.split(',').map((o) => o.trim()),
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: corsOrigin !== '*',
+  });
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
 
