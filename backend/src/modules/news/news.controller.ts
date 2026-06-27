@@ -2,18 +2,18 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { NewsService } from './news.service';
 import { ListNewsQueryDto } from './dto/list-news-query.dto';
 import {
-  ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
   getSchemaPath,
 } from '@nestjs/swagger';
+import { Public } from '../../common/auth/public.decorator';
 import { NewsResponseDto } from './dto/news-response.dto';
 
-@ApiBearerAuth('jwt')
 @Controller('news')
 export class NewsController {
   constructor(private readonly newsService: NewsService) {}
 
+  @Public()
   @Get()
   @ApiOperation({
     summary: 'List news',
