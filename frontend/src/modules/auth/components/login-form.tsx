@@ -5,7 +5,6 @@ import { AlertCircleIcon, Loader2Icon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { loginAction } from "@/modules/auth/actions/auth.actions";
 import { AUTH_REGISTER_PATH } from "@/modules/auth/auth.constants";
@@ -67,7 +66,6 @@ export function LoginForm() {
 
     if (result.status === "error" && result.message && !result.fieldErrors) {
       setFormError(result.message);
-      toast.error(result.message);
     }
   });
 

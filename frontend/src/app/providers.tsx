@@ -3,7 +3,6 @@
 import { ThemeProvider } from "next-themes";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { PropsWithChildren } from "react";
-import { Toaster } from "@/shared/components/ui/sonner";
 import { QueryProvider } from "@/shared/lib/react-query/query-provider";
 
 export function Providers({ children }: PropsWithChildren) {
@@ -11,7 +10,6 @@ export function Providers({ children }: PropsWithChildren) {
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
       <QueryProvider>
         <NuqsAdapter>{children}</NuqsAdapter>
-        <Toaster position="top-right" richColors closeButton />
       </QueryProvider>
     </ThemeProvider>
   );
