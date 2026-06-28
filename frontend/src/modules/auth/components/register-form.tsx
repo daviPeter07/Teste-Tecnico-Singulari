@@ -1,16 +1,10 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircleIcon, Loader2Icon } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-
-import { registerAction } from "@/modules/auth/actions/auth.actions";
-import { AUTH_LOGIN_PATH } from "@/modules/auth/auth.constants";
 import { PasswordInput } from "@/modules/auth/components/password-input";
-import { registerSchema } from "@/modules/auth/schemas/auth.schema";
-import type { RegisterValues } from "@/modules/auth/types/auth.types";
+import { useRegisterForm } from "@/modules/auth/hooks/use-register-form";
+import { AUTH_LOGIN_PATH } from "@/modules/auth/types/auth.constants";
 import {
   Alert,
   AlertDescription,
@@ -29,53 +23,7 @@ import {
 import { Input } from "@/shared/components/ui/input";
 
 export function RegisterForm() {
-  const [formError, setFormError] = useState<string | null>(null);
-
-  const form = useForm<RegisterValues>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    },
-    mode: "onBlur",
-  });
-
-  const {
-    formState: { isSubmitting },
-  } = form;
-
-  const onSubmit = form.handleSubmit(async (values) => {
-    setFormError(null);
-    form.clearErrors();
-
-    const result = await registerAction(values);
-
-    const fieldNames = [
-      "name",
-      "email",
-      "password",
-      "confirmPassword",
-    ] as const;
-
-    if (result.fieldErrors) {
-      for (const fieldName of fieldNames) {
-        const message = result.fieldErrors[fieldName]?.[0];
-
-        if (message) {
-          form.setError(fieldName, {
-            type: "server",
-            message,
-          });
-        }
-      }
-    }
-
-    if (result.status === "error" && result.message && !result.fieldErrors) {
-      setFormError(result.message);
-    }
-  });
+  const { form, formError, isSubmitting, onSubmit } = useRegisterForm();
 
   return (
     <Form {...form}>

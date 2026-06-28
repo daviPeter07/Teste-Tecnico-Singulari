@@ -1,4 +1,15 @@
-import type { NewsPeriod } from "@/modules/news/news.constants";
+export const newsPeriodValues = ["day", "week", "month"] as const;
+
+export type NewsPeriod = (typeof newsPeriodValues)[number];
+
+export const DEFAULT_NEWS_PERIOD: NewsPeriod = "week";
+export const NEWS_PAGE_LIMIT = 10;
+
+export const newsPeriods = [
+  { label: "Hoje", value: "day" },
+  { label: "Semana", value: "week" },
+  { label: "Mês", value: "month" },
+] as const satisfies ReadonlyArray<{ label: string; value: NewsPeriod }>;
 
 export type NewsCategory = {
   id: string;

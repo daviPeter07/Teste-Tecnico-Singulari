@@ -4,7 +4,7 @@ import {
   AUTH_LOGIN_PATH,
   AUTH_REDIRECT_PATH,
   AUTH_REGISTER_PATH,
-} from "@/modules/auth/auth.constants";
+} from "@/modules/auth/types/auth.constants";
 
 const AUTH_ROUTES = new Set([AUTH_LOGIN_PATH, AUTH_REGISTER_PATH]);
 const PROTECTED_PREFIXES = ["/preferences"];

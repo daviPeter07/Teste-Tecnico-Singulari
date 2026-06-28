@@ -6,7 +6,7 @@ import {
   AUTH_COOKIE_NAME,
   AUTH_LOGIN_PATH,
   AUTH_REDIRECT_PATH,
-} from "@/modules/auth/auth.constants";
+} from "@/modules/auth/types/auth.constants";
 import type {
   AuthResponse,
   AuthUser,

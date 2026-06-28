@@ -1,16 +1,10 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircleIcon, Loader2Icon } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-
-import { loginAction } from "@/modules/auth/actions/auth.actions";
-import { AUTH_REGISTER_PATH } from "@/modules/auth/auth.constants";
 import { PasswordInput } from "@/modules/auth/components/password-input";
-import { loginSchema } from "@/modules/auth/schemas/auth.schema";
-import type { LoginValues } from "@/modules/auth/types/auth.types";
+import { useLoginForm } from "@/modules/auth/hooks/use-login-form";
+import { AUTH_REGISTER_PATH } from "@/modules/auth/types/auth.constants";
 import {
   Alert,
   AlertDescription,
@@ -29,45 +23,7 @@ import {
 import { Input } from "@/shared/components/ui/input";
 
 export function LoginForm() {
-  const [formError, setFormError] = useState<string | null>(null);
-
-  const form = useForm<LoginValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-    mode: "onBlur",
-  });
-
-  const {
-    formState: { isSubmitting },
-  } = form;
-
-  const onSubmit = form.handleSubmit(async (values) => {
-    setFormError(null);
-    form.clearErrors();
-
-    const result = await loginAction(values);
-
-    if (result.fieldErrors?.email?.[0]) {
-      form.setError("email", {
-        type: "server",
-        message: result.fieldErrors.email[0],
-      });
-    }
-
-    if (result.fieldErrors?.password?.[0]) {
-      form.setError("password", {
-        type: "server",
-        message: result.fieldErrors.password[0],
-      });
-    }
-
-    if (result.status === "error" && result.message && !result.fieldErrors) {
-      setFormError(result.message);
-    }
-  });
+  const { form, formError, isSubmitting, onSubmit } = useLoginForm();
 
   return (
     <Form {...form}>

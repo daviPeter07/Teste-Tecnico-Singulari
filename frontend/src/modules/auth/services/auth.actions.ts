@@ -2,14 +2,14 @@
 
 import { redirect } from "next/navigation";
 import {
-  AUTH_LOGIN_PATH,
-  AUTH_REDIRECT_PATH,
-} from "@/modules/auth/auth.constants";
-import {
   loginSchema,
   registerSchema,
 } from "@/modules/auth/schemas/auth.schema";
 import { authService } from "@/modules/auth/services/auth.service";
+import {
+  AUTH_LOGIN_PATH,
+  AUTH_REDIRECT_PATH,
+} from "@/modules/auth/types/auth.constants";
 import type {
   LoginActionState,
   LoginValues,

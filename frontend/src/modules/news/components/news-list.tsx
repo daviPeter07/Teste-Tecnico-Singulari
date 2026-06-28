@@ -60,10 +60,7 @@ export function NewsList({
         <AlertCircleIcon className="size-4" />
         <AlertTitle>Não foi possível carregar as notícias</AlertTitle>
         <AlertDescription className="space-y-4">
-          <p>
-            {errorMessage ??
-              "Tente novamente em instantes para buscar a lista pública."}
-          </p>
+          <p>{errorMessage ?? "Tente novamente em instantes."}</p>
           <Button
             className="w-fit"
             onClick={onRetry}
@@ -80,7 +77,7 @@ export function NewsList({
   if (!response || response.data.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-border/80 px-6 py-14 text-center text-sm text-muted-foreground">
-        Nenhuma notícia pública foi encontrada para o período selecionado.
+        Nenhuma notícia foi encontrada para o período selecionado.
       </div>
     );
   }

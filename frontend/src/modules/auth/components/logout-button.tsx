@@ -2,7 +2,7 @@
 
 import { Loader2Icon, LogOutIcon } from "lucide-react";
 import { useFormStatus } from "react-dom";
-import { logoutAction } from "@/modules/auth/actions/auth.actions";
+import { logoutAction } from "@/modules/auth/services/auth.actions";
 import { Button } from "@/shared/components/ui/button";
 
 function LogoutSubmit({

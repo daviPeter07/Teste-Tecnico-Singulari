@@ -3,9 +3,11 @@
 import { FilterIcon, NewspaperIcon, RefreshCcwIcon } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { NewsList } from "@/modules/news/components/news-list";
-import { useNewsQuery } from "@/modules/news/hooks/use-news-query";
-import { NEWS_PAGE_LIMIT, newsPeriods } from "@/modules/news/news.constants";
-import { newsPeriodParser } from "@/modules/news/news.query-state";
+import {
+  newsPeriodParser,
+  useNewsListQuery,
+} from "@/modules/news/hooks/use-news-list-query";
+import { NEWS_PAGE_LIMIT, newsPeriods } from "@/modules/news/types/news.types";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -18,7 +20,7 @@ import { ApiError } from "@/shared/lib/http/api-error";
 
 export function NewsFeed() {
   const [period, setPeriod] = useQueryState("period", newsPeriodParser);
-  const newsQuery = useNewsQuery({
+  const newsQuery = useNewsListQuery({
     page: 1,
     limit: NEWS_PAGE_LIMIT,
     period,
@@ -36,8 +38,7 @@ export function NewsFeed() {
             Filtros
           </CardTitle>
           <CardDescription>
-            Filtre as notícias públicas por período usando o contrato real da
-            API.
+            Escolha o período para ver as notícias mais recentes.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -77,8 +78,7 @@ export function NewsFeed() {
             Notícias públicas
           </CardTitle>
           <CardDescription>
-            A listagem abaixo é hidratada no servidor e mantida pelo React Query
-            no cliente.
+            Confira uma seleção de notícias para acompanhar o que importa agora.
           </CardDescription>
         </CardHeader>
         <CardContent>

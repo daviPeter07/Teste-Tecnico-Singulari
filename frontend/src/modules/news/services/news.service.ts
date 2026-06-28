@@ -1,12 +1,11 @@
-import { queryOptions } from "@tanstack/react-query";
+import type {
+  ListNewsParams,
+  PaginatedNewsResponse,
+} from "@/modules/news/types/news.types";
 import {
   DEFAULT_NEWS_PERIOD,
   NEWS_PAGE_LIMIT,
   type NewsPeriod,
-} from "@/modules/news/news.constants";
-import type {
-  ListNewsParams,
-  PaginatedNewsResponse,
 } from "@/modules/news/types/news.types";
 import { apiClient } from "@/shared/lib/http/api-client";
 
@@ -52,18 +51,6 @@ async function listNews(
   );
 }
 
-function getNewsListQueryOptions(params: ListNewsParams = {}) {
-  const normalizedParams = normalizeListNewsParams(params);
-
-  return queryOptions({
-    queryKey: ["news", "list", normalizedParams] as const,
-    queryFn: () => listNews(normalizedParams),
-  });
-}
-
 export const newsService = {
   listNews,
-  getNewsListQueryOptions,
 };
-
-export { getNewsListQueryOptions };

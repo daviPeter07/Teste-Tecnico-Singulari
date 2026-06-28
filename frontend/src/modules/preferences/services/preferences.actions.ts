@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { authService } from "@/modules/auth/services/auth.service";
-import { preferencesServerService } from "@/modules/preferences/services/preferences.server";
+import { updateMyPreferencesSchema } from "@/modules/preferences/schemas/preferences.schema";
+import { preferencesService } from "@/modules/preferences/services/preferences.service";
 import type { Preference } from "@/modules/preferences/types/preferences.types";
 import { ApiError } from "@/shared/lib/http/api-error";
 
@@ -43,15 +44,26 @@ export async function updateMyPreferencesAction(
     };
   }
 
-  const categoryIds = formData
-    .getAll("categoryIds")
-    .filter((value): value is string => typeof value === "string")
-    .filter(Boolean);
+  const parsed = updateMyPreferencesSchema.safeParse({
+    categoryIds: formData
+      .getAll("categoryIds")
+      .filter((value): value is string => typeof value === "string")
+      .filter(Boolean),
+  });
+
+  if (!parsed.success) {
+    return {
+      status: "error",
+      message: "Não foi possível salvar suas preferências agora.",
+      savedIds: [],
+    };
+  }
 
   try {
-    const preferences = await preferencesServerService.updateMyPreferences(token, {
-      categoryIds,
-    });
+    const preferences = await preferencesService.updateMyPreferences(
+      token,
+      parsed.data,
+    );
 
     revalidatePath("/");
     revalidatePath("/preferences");

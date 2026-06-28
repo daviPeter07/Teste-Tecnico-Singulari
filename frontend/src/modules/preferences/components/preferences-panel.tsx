@@ -6,12 +6,8 @@ import {
   Loader2Icon,
   ShieldCheckIcon,
 } from "lucide-react";
-import { useActionState, useEffect, useMemo, useState } from "react";
 import type { AuthUser } from "@/modules/auth/types/auth.types";
-import {
-  initialUpdatePreferencesState,
-  updateMyPreferencesAction,
-} from "@/modules/preferences/actions/preferences.actions";
+import { usePreferencesForm } from "@/modules/preferences/hooks/use-preferences-form";
 import type { Preference } from "@/modules/preferences/types/preferences.types";
 import {
   Alert,
@@ -43,17 +39,6 @@ import {
   FieldSet,
   FieldTitle,
 } from "@/shared/components/ui/field";
-function getPreferenceIds(preferences?: Preference[]) {
-  return [...(preferences ?? [])].map((preference) => preference.id).sort();
-}
-
-function areEqualPreferenceIds(current: string[], next: string[]) {
-  if (current.length !== next.length) {
-    return false;
-  }
-
-  return current.every((id, index) => id === next[index]);
-}
 
 type PreferencesPanelProps = {
   user: AuthUser;
@@ -68,45 +53,14 @@ export function PreferencesPanel({
   initialPreferences,
   loadErrorMessage,
 }: PreferencesPanelProps) {
-  const initialSavedIds = useMemo(
-    () => getPreferenceIds(initialPreferences),
-    [initialPreferences],
-  );
-  const [state, formAction, isPending] = useActionState(
-    updateMyPreferencesAction,
-    {
-      ...initialUpdatePreferencesState,
-      savedIds: initialSavedIds,
-    },
-  );
-  const [selectedIds, setSelectedIds] = useState<string[]>(initialSavedIds);
-
-  useEffect(() => {
-    if (state.status === "success") {
-      setSelectedIds(state.savedIds);
-    }
-  }, [state.savedIds, state.status]);
-
-  const savedIds = state.savedIds;
-  const sortedSelectedIds = useMemo(
-    () => [...selectedIds].sort(),
-    [selectedIds],
-  );
-  const hasPendingChanges = !areEqualPreferenceIds(sortedSelectedIds, savedIds);
-
-  function toggleCategory(categoryId: string, checked: boolean) {
-    setSelectedIds((currentIds) => {
-      if (checked) {
-        if (currentIds.includes(categoryId)) {
-          return currentIds;
-        }
-
-        return [...currentIds, categoryId];
-      }
-
-      return currentIds.filter((id) => id !== categoryId);
-    });
-  }
+  const {
+    formAction,
+    hasPendingChanges,
+    isPending,
+    selectedIds,
+    state,
+    toggleCategory,
+  } = usePreferencesForm(initialPreferences);
 
   return (
     <div className="grid w-full gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
@@ -217,7 +171,9 @@ export function PreferencesPanel({
 
                 <Button
                   className="sm:min-w-40"
-                  disabled={!hasPendingChanges || isPending || !!loadErrorMessage}
+                  disabled={
+                    !hasPendingChanges || isPending || !!loadErrorMessage
+                  }
                   type="submit"
                 >
                   {isPending ? "Salvando..." : "Salvar preferências"}

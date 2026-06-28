@@ -6,7 +6,7 @@ import type {
 } from "@/modules/preferences/types/preferences.types";
 import { apiClient } from "@/shared/lib/http/api-client";
 
-export const preferencesServerService = {
+export const preferencesService = {
   listAvailablePreferences(token: string) {
     return apiClient.get<Preference[]>("/preferences", { token });
   },
