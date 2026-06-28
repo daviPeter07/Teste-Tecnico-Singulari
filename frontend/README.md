@@ -1,36 +1,171 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Newsletter Inteligente - Frontend
 
-## Getting Started
+Frontend da plataforma de curadoria de notícias, desenvolvido com Next.js e organizado como um monolito modular.
 
-First, run the development server:
+O projeto consome a API REST responsável por autenticação, notícias, categorias e preferências do usuário. A aplicação combina renderização no servidor com interatividade no cliente para entregar um carregamento inicial rápido e uma navegação fluida.
+
+## Tecnologias
+
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- shadcn/ui
+- TanStack React Query
+- nuqs
+- Zod
+- Lucide React
+- Biome
+
+## Arquitetura
+
+O frontend segue uma arquitetura de monolito modular. Cada módulo concentra as regras, componentes e integrações pertencentes ao seu domínio.
+
+```text
+src/
+├── app/
+│   ├── (auth)/
+│   │   ├── login/
+│   │   └── register/
+│   ├── (main)/
+│   │   └── preferences/
+│   ├── layout.tsx
+│   └── providers.tsx
+├── modules/
+│   ├── auth/
+│   │   ├── actions/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── schemas/
+│   │   ├── services/
+│   │   └── types/
+│   ├── news/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── queries/
+│   │   ├── schemas/
+│   │   ├── services/
+│   │   └── types/
+│   └── preferences/
+│       ├── components/
+│       ├── pages/
+│       ├── queries/
+│       ├── schemas/
+│       ├── services/
+│       └── types/
+└── shared/
+    ├── components/
+    │   ├── layout/
+    │   └── ui/
+    ├── hooks/
+    ├── lib/
+    │   ├── http/
+    │   └── react-query/
+    └── types/
+```
+
+### `app`
+
+Contém as rotas, layouts e pontos de entrada do App Router. Os arquivos `page.tsx` permanecem pequenos e delegam a construção das telas para os respectivos módulos.
+
+### `modules`
+
+Contém os domínios da aplicação:
+
+- `auth`: login, cadastro, sessão e logout.
+- `news`: listagem, filtros por período e paginação de notícias.
+- `preferences`: consulta e atualização das categorias preferidas pelo usuário.
+
+### `shared`
+
+Contém apenas recursos reutilizáveis entre diferentes módulos:
+
+- Componentes do shadcn/ui.
+- Layouts compartilhados.
+- Cliente HTTP.
+- Configuração do React Query.
+- Hooks, tipos e utilitários genéricos.
+
+Services que conhecem regras ou endpoints de um domínio permanecem dentro do próprio módulo.
+
+## Gerenciamento de dados
+
+Cada tipo de estado possui uma responsabilidade definida:
+
+- React Query gerencia dados remotos, cache, paginação e mutations.
+- nuqs mantém filtros e paginação sincronizados com a URL.
+- Zod valida formulários, parâmetros e contratos recebidos da API.
+- Estado local do React controla interações específicas de componentes.
+- A sessão de autenticação deve ser armazenada em cookie `HttpOnly`.
+
+Zustand não faz parte da configuração inicial. Ele somente deverá ser adicionado caso apareça um estado global de cliente que não pertença à API, à URL ou a um componente específico.
+
+## SSR e hidratação
+
+As rotas são Server Components por padrão. Nas páginas que utilizam React Query, o fluxo planejado é:
+
+1. O `page.tsx` interpreta os parâmetros da URL.
+2. O servidor executa o prefetch da query.
+3. O HTML é renderizado com os dados iniciais.
+4. O cache é enviado ao cliente com `HydrationBoundary`.
+5. O React Query assume as atualizações posteriores no navegador.
+
+Essa estratégia evita uma nova requisição imediata após a hidratação e preserva a interatividade no cliente.
+
+## Configuração
+
+Crie um arquivo `.env.local` na raiz do frontend:
+
+```env
+NEXT_PUBLIC_API_URL=<URL_DA_API>
+```
+
+Não adicione tokens, senhas ou chaves privadas em variáveis iniciadas com `NEXT_PUBLIC_`, pois elas ficam disponíveis no navegador.
+
+## Executando o projeto
+
+Instale as dependências:
+
+```bash
+npm install
+```
+
+Inicie o ambiente de desenvolvimento:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+O endereço utilizado pelo Next.js será exibido no terminal.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev
+npm run build
+npm run start
+npm run lint
+npm run format
+```
 
-## Learn More
+| Script | Descrição |
+| --- | --- |
+| `dev` | Inicia o servidor de desenvolvimento |
+| `build` | Gera o build de produção |
+| `start` | Executa o build de produção |
+| `lint` | Analisa o código com Biome |
+| `format` | Formata os arquivos com Biome |
 
-To learn more about Next.js, take a look at the following resources:
+## Padrões do projeto
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Componentes reutilizáveis utilizam funções nomeadas.
+- Componentes que representam páginas utilizam exportação padrão.
+- Chamadas HTTP são centralizadas nos services dos módulos.
+- Componentes do shadcn/ui ficam em `src/shared/components/ui`.
+- Tipos derivados de schemas devem utilizar `z.infer` para evitar duplicação.
+- Server Components são mantidos como padrão.
+- A diretiva `"use client"` é adicionada somente quando há estado, eventos ou APIs do navegador.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Status
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+A estrutura-base e as ferramentas do frontend estão configuradas. As telas e integrações com a API serão implementadas de forma incremental por domínio.
