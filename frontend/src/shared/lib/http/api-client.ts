@@ -68,4 +68,6 @@ export const apiClient = {
     request<T>(path, { ...options, method: "GET" }),
   post: <T>(path: string, options?: ApiClientOptions) =>
     request<T>(path, { ...options, method: "POST" }),
+  put: <T>(path: string, options?: ApiClientOptions) =>
+    request<T>(path, { ...options, method: "PUT" }),
 };
