@@ -1,19 +1,17 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2Icon, SparklesIcon } from "lucide-react";
+import { AlertCircleIcon, Loader2Icon } from "lucide-react";
 import Link from "next/link";
-import { useActionState, useEffect, useTransition } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+
 import { registerAction } from "@/modules/auth/actions/auth.actions";
 import { AUTH_LOGIN_PATH } from "@/modules/auth/auth.constants";
 import { PasswordInput } from "@/modules/auth/components/password-input";
 import { registerSchema } from "@/modules/auth/schemas/auth.schema";
-import {
-  initialRegisterActionState,
-  type RegisterValues,
-} from "@/modules/auth/types/auth.types";
+import type { RegisterValues } from "@/modules/auth/types/auth.types";
 import {
   Alert,
   AlertDescription,
@@ -32,11 +30,8 @@ import {
 import { Input } from "@/shared/components/ui/input";
 
 export function RegisterForm() {
-  const [state, formAction, pending] = useActionState(
-    registerAction,
-    initialRegisterActionState,
-  );
-  const [, startTransition] = useTransition();
+  const [formError, setFormError] = useState<string | null>(null);
+
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -48,58 +43,51 @@ export function RegisterForm() {
     mode: "onBlur",
   });
 
-  useEffect(() => {
-    if (state.status === "error" && state.message) {
-      toast.error(state.message);
-    }
-  }, [state]);
+  const {
+    formState: { isSubmitting },
+  } = form;
 
-  useEffect(() => {
-    form.reset({
-      name: state.values.name ?? "",
-      email: state.values.email ?? "",
-      password: state.values.password ?? "",
-      confirmPassword: state.values.confirmPassword ?? "",
-    });
-
+  const onSubmit = form.handleSubmit(async (values) => {
+    setFormError(null);
     form.clearErrors();
 
-    if (state.fieldErrors) {
-      for (const [fieldName, messages] of Object.entries(state.fieldErrors)) {
-        const message = messages?.[0];
+    const result = await registerAction(values);
+
+    const fieldNames = [
+      "name",
+      "email",
+      "password",
+      "confirmPassword",
+    ] as const;
+
+    if (result.fieldErrors) {
+      for (const fieldName of fieldNames) {
+        const message = result.fieldErrors[fieldName]?.[0];
 
         if (message) {
-          form.setError(fieldName as keyof RegisterValues, {
+          form.setError(fieldName, {
             type: "server",
             message,
           });
         }
       }
     }
-  }, [form, state.fieldErrors, state.values]);
 
-  const onSubmit = form.handleSubmit((values) => {
-    const formData = new FormData();
-
-    formData.set("name", values.name);
-    formData.set("email", values.email);
-    formData.set("password", values.password);
-    formData.set("confirmPassword", values.confirmPassword);
-
-    startTransition(() => {
-      formAction(formData);
-    });
+    if (result.status === "error" && result.message && !result.fieldErrors) {
+      setFormError(result.message);
+      toast.error(result.message);
+    }
   });
 
   return (
     <Form {...form}>
-      <form className="contents" onSubmit={onSubmit}>
+      <form className="contents" noValidate onSubmit={onSubmit}>
         <CardContent className="space-y-6">
-          {state.message ? (
+          {formError ? (
             <Alert variant="destructive">
-              <SparklesIcon className="size-4" />
+              <AlertCircleIcon className="size-4" />
               <AlertTitle>Não foi possível concluir o cadastro</AlertTitle>
-              <AlertDescription>{state.message}</AlertDescription>
+              <AlertDescription>{formError}</AlertDescription>
             </Alert>
           ) : null}
 
@@ -181,9 +169,12 @@ export function RegisterForm() {
         </CardContent>
 
         <div className="flex flex-col items-stretch gap-4 px-(--card-spacing) pt-2 pb-(--card-spacing)">
-          <Button className="h-10 w-full" disabled={pending} type="submit">
-            {pending ? <Loader2Icon className="animate-spin" /> : null}
-            {pending ? "Criando conta..." : "Criar conta"}
+          <Button className="h-10 w-full" disabled={isSubmitting} type="submit">
+            {isSubmitting && (
+              <Loader2Icon aria-hidden="true" className="animate-spin" />
+            )}
+
+            {isSubmitting ? "Criando conta..." : "Criar conta"}
           </Button>
 
           <p className="text-center text-sm text-muted-foreground">
