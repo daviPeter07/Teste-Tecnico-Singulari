@@ -27,6 +27,5 @@ type FormState<TValues extends Record<string, string>> = {
 export type LoginValues = z.infer<typeof loginSchema>;
 export type RegisterValues = z.infer<typeof registerSchema>;
 
-
 export type LoginActionState = FormState<LoginValues>;
 export type RegisterActionState = FormState<RegisterValues>;

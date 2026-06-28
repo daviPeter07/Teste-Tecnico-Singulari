@@ -41,7 +41,7 @@ export default async function MainLayout({
             ) : (
               <>
                 <Button asChild size="sm" variant="ghost">
-                  <Link href="/">Entrar</Link>
+                  <Link href="/login">Entrar</Link>
                 </Button>
                 <Button asChild size="sm">
                   <Link href="/register">Criar conta</Link>

@@ -130,11 +130,7 @@ export function LoginForm() {
         </CardContent>
 
         <div className="flex flex-col items-stretch gap-4 px-(--card-spacing) pt-2 pb-(--card-spacing)">
-          <Button
-            className="h-10 w-full"
-            disabled={isSubmitting}
-            type="submit"
-          >
+          <Button className="h-10 w-full" disabled={isSubmitting} type="submit">
             {isSubmitting && (
               <Loader2Icon aria-hidden="true" className="animate-spin" />
             )}
