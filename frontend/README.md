@@ -1,11 +1,26 @@
 # Newsletter Inteligente - Frontend
 
-Frontend da plataforma de curadoria de notícias, desenvolvido com Next.js e organizado como um monolito modular.
+SPA desenvolvida em Next.js para o desafio da Newsletter Inteligente.
 
-O projeto consome a API REST responsável por autenticação, notícias, categorias e preferências do usuário. A aplicação combina renderização no servidor com interatividade no cliente para entregar um carregamento inicial rápido e uma navegação fluida.
+O frontend cobre o núcleo essencial pedido no PDF:
 
-## Tecnologias
+- exibir notícias em uma interface web
+- permitir filtro por período `day|week|month`
+- consumir a API real do backend
+- oferecer experiência responsiva para desktop e mobile
 
+Além disso, também entrega bônus importantes:
+
+- login e cadastro de usuários
+- sessão autenticada com cookie `HttpOnly`
+- tela protegida de preferências
+- atualização de preferências do usuário
+- prefetch no servidor para a listagem principal
+- organização modular por domínio
+
+## Stack
+
+- Node.js 20+
 - Next.js 16
 - React 19
 - TypeScript
@@ -14,129 +29,148 @@ O projeto consome a API REST responsável por autenticação, notícias, categor
 - TanStack React Query
 - nuqs
 - Zod
-- Lucide React
 - Biome
 
-## Arquitetura
+## Decisões Técnicas
 
-O frontend segue uma arquitetura de monolito modular. Cada módulo concentra as regras, componentes e integrações pertencentes ao seu domínio.
+### Framework
+
+Foi escolhido Next.js com App Router.
+
+Motivos:
+
+- permite combinar renderização no servidor com interatividade no cliente
+- simplifica rotas públicas e protegidas no mesmo projeto
+- encaixa bem com formulários, cookies e server actions
+
+### Organização por módulos
+
+Foi adotado um monolito modular no frontend.
+
+Com isso:
+
+- cada domínio mantém seus próprios `components`, `hooks`, `pages`, `queries`, `schemas`, `services` e `types`
+- as regras de `auth`, `news` e `preferences` ficam desacopladas entre si
+- os arquivos em `app/` permanecem finos, servindo apenas como pontos de entrada
+
+### Comunicação com o backend
+
+O frontend consome diretamente a API REST já exposta pelo backend.
+
+Com isso:
+
+- a home usa o endpoint público de notícias
+- login, cadastro e preferências usam os endpoints autenticados reais
+- o frontend apenas consome o `summary` já enriquecido pelo backend, sem duplicar a lógica de IA
+
+### Sessão autenticada
+
+Foi escolhido armazenar o token em cookie `HttpOnly`.
+
+Com isso:
+
+- o token não fica exposto em variáveis globais do navegador
+- rotas protegidas podem ser validadas no servidor
+- logout e recuperação de sessão ficam centralizados no módulo de autenticação
+
+## Escopo Atual do Frontend
+
+### Essencial entregue
+
+- home com listagem de notícias
+- cards com título, fonte, resumo e data
+- filtro por período `Hoje`, `Semana` e `Mês`
+- consumo do endpoint real `GET /news`
+
+### Bônus já implementados
+
+- tela de login
+- tela de cadastro
+- persistência de sessão autenticada em cookie
+- redirecionamento de rotas públicas e protegidas
+- tela de preferências do usuário
+- atualização de preferências com feedback de loading, erro e sucesso
+
+## Estrutura de Módulos
+
+- `auth`: login, cadastro, sessão, logout e redirecionamentos
+- `news`: listagem principal, filtros e consumo da consulta pública
+- `preferences`: leitura e atualização das categorias do usuário autenticado
+
+## Arquitetura de Diretórios
 
 ```text
 src/
-├── app/
-│   ├── (auth)/
-│   │   ├── login/
-│   │   └── register/
-│   ├── (main)/
-│   │   └── preferences/
-│   ├── layout.tsx
-│   └── providers.tsx
-├── modules/
-│   ├── auth/
-│   │   ├── actions/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── schemas/
-│   │   ├── services/
-│   │   └── types/
-│   ├── news/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── queries/
-│   │   ├── schemas/
-│   │   ├── services/
-│   │   └── types/
-│   └── preferences/
-│       ├── components/
-│       ├── pages/
-│       ├── queries/
-│       ├── schemas/
-│       ├── services/
-│       └── types/
-└── shared/
-    ├── components/
-    │   ├── layout/
-    │   └── ui/
-    ├── hooks/
-    ├── lib/
-    │   ├── http/
-    │   └── react-query/
-    └── types/
+|-- app/
+|   |-- (auth)/
+|   |   |-- login/
+|   |   `-- register/
+|   |-- (main)/
+|   |   `-- preferences/
+|   |-- layout.tsx
+|   `-- providers.tsx
+|-- modules/
+|   |-- auth/
+|   |   |-- components/
+|   |   |-- hooks/
+|   |   |-- pages/
+|   |   |-- schemas/
+|   |   |-- services/
+|   |   `-- types/
+|   |-- news/
+|   |   |-- components/
+|   |   |-- hooks/
+|   |   |-- pages/
+|   |   |-- queries/
+|   |   |-- services/
+|   |   `-- types/
+|   `-- preferences/
+|       |-- components/
+|       |-- hooks/
+|       |-- pages/
+|       |-- schemas/
+|       |-- services/
+|       `-- types/
+`-- shared/
+    |-- components/
+    |   `-- ui/
+    `-- lib/
+        |-- http/
+        `-- react-query/
 ```
 
-### `app`
+## Variáveis de Ambiente
 
-Contém as rotas, layouts e pontos de entrada do App Router. Os arquivos `page.tsx` permanecem pequenos e delegam a construção das telas para os respectivos módulos.
+Crie um arquivo `.env.local` na raiz do frontend.
 
-### `modules`
-
-Contém os domínios da aplicação:
-
-- `auth`: login, cadastro, sessão e logout.
-- `news`: listagem, filtros por período e paginação de notícias.
-- `preferences`: consulta e atualização das categorias preferidas pelo usuário.
-
-### `shared`
-
-Contém apenas recursos reutilizáveis entre diferentes módulos:
-
-- Componentes do shadcn/ui.
-- Layouts compartilhados.
-- Cliente HTTP.
-- Configuração do React Query.
-- Hooks, tipos e utilitários genéricos.
-
-Services que conhecem regras ou endpoints de um domínio permanecem dentro do próprio módulo.
-
-## Gerenciamento de dados
-
-Cada tipo de estado possui uma responsabilidade definida:
-
-- React Query gerencia dados remotos, cache, paginação e mutations.
-- nuqs mantém filtros e paginação sincronizados com a URL.
-- Zod valida formulários, parâmetros e contratos recebidos da API.
-- Estado local do React controla interações específicas de componentes.
-- A sessão de autenticação deve ser armazenada em cookie `HttpOnly`.
-
-Zustand não faz parte da configuração inicial. Ele somente deverá ser adicionado caso apareça um estado global de cliente que não pertença à API, à URL ou a um componente específico.
-
-## SSR e hidratação
-
-As rotas são Server Components por padrão. Nas páginas que utilizam React Query, o fluxo planejado é:
-
-1. O `page.tsx` interpreta os parâmetros da URL.
-2. O servidor executa o prefetch da query.
-3. O HTML é renderizado com os dados iniciais.
-4. O cache é enviado ao cliente com `HydrationBoundary`.
-5. O React Query assume as atualizações posteriores no navegador.
-
-Essa estratégia evita uma nova requisição imediata após a hidratação e preserva a interatividade no cliente.
-
-## Configuração
-
-Crie um arquivo `.env.local` na raiz do frontend:
+Variável principal:
 
 ```env
-NEXT_PUBLIC_API_URL=<URL_DA_API>
+NEXT_PUBLIC_API_URL=http://localhost:3333
 ```
 
-Não adicione tokens, senhas ou chaves privadas em variáveis iniciadas com `NEXT_PUBLIC_`, pois elas ficam disponíveis no navegador.
+Observações:
 
-## Executando o projeto
+- apenas a URL pública da API deve ficar em `NEXT_PUBLIC_*`
+- tokens e segredos não devem ser expostos no frontend
 
-Instale as dependências:
+## Como Rodar Localmente
+
+### 1. Instalar dependências
 
 ```bash
 npm install
 ```
 
-Inicie o ambiente de desenvolvimento:
+### 2. Criar o `.env.local`
+
+Copie a variável acima apontando para a API do backend.
+
+### 3. Rodar o frontend
 
 ```bash
 npm run dev
 ```
-
-O endereço utilizado pelo Next.js será exibido no terminal.
 
 ## Scripts
 
@@ -148,24 +182,66 @@ npm run lint
 npm run format
 ```
 
-| Script | Descrição |
-| --- | --- |
-| `dev` | Inicia o servidor de desenvolvimento |
-| `build` | Gera o build de produção |
-| `start` | Executa o build de produção |
-| `lint` | Analisa o código com Biome |
-| `format` | Formata os arquivos com Biome |
+## Fluxo Atual da Home
 
-## Padrões do projeto
+```text
+Usuário acessa "/"
+       |
+       v
+HomePage interpreta o período atual
+       |
+       v
+Prefetch da consulta de notícias no servidor
+       |
+       v
+NewsFeed assume interações no cliente
+       |
+       v
+Usuário troca o período
+       |
+       v
+Nova consulta é disparada para atualizar a lista
+```
 
-- Componentes reutilizáveis utilizam funções nomeadas.
-- Componentes que representam páginas utilizam exportação padrão.
-- Chamadas HTTP são centralizadas nos services dos módulos.
-- Componentes do shadcn/ui ficam em `src/shared/components/ui`.
-- Tipos derivados de schemas devem utilizar `z.infer` para evitar duplicação.
-- Server Components são mantidos como padrão.
-- A diretiva `"use client"` é adicionada somente quando há estado, eventos ou APIs do navegador.
+## Telas Atuais
 
-## Status
+### Públicas
 
-A estrutura-base e as ferramentas do frontend estão configuradas. As telas e integrações com a API serão implementadas de forma incremental por domínio.
+- `/`
+- `/login`
+- `/register`
+
+### Protegidas
+
+- `/preferences`
+
+## Integrações com o Backend
+
+### Públicas
+
+- `GET /news`
+- `POST /users`
+- `POST /login`
+
+### Autenticadas
+
+- `GET /me`
+- `POST /logout`
+- `GET /preferences`
+- `GET /users/me/preferences`
+- `PUT /users/me/preferences`
+
+## Observações Importantes
+
+- o frontend está estruturado para consumir a autenticação e preferências já prontas no backend
+- a IA não roda no frontend; ele apenas exibe os resumos gerados no backend
+- a listagem principal já usa o filtro por período, mas a navegação explícita entre páginas ainda não foi implementada na interface
+- a solução ainda não possui container próprio do frontend integrado ao compose principal do projeto
+- o build de produção ainda depende do ajuste das fontes remotas usadas no layout global
+
+## Observações Finais
+
+- o frontend está funcional para home, autenticação e preferências
+- a organização modular foi consolidada por camadas
+- a próxima entrega mais evidente no frontend é paginação visível na home
+- a próxima entrega mais evidente no projeto completo é containerizar também o frontend no fluxo principal
