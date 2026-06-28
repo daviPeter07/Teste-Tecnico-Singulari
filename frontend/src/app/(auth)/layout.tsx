@@ -5,7 +5,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-10 sm:px-8 lg:px-12">
       <Card className="grid w-full max-w-6xl overflow-hidden border border-border/70 bg-card/88 shadow-2xl shadow-black/20 lg:grid-cols-[1.05fr_0.95fr]">
-        <section className="flex flex-col justify-between gap-10 border-b border-border/70 bg-muted/45 px-6 py-8 sm:px-8 lg:border-r lg:border-b-0 lg:px-10 lg:py-10">
+        <section className="flex flex-col justify-between gap-10 border-b border-border/70 px-6 py-8 sm:px-8 lg:border-r lg:border-b-0 lg:px-10 lg:py-10">
           <div className="space-y-4">
             <p className="text-xs font-medium uppercase tracking-[0.35em] text-muted-foreground">
               Newsletter Inteligente

@@ -15,19 +15,19 @@ export default async function PreferencesPage() {
     <div className="grid w-full gap-6">
       <Card className="border border-border/70 bg-card/82 shadow-lg shadow-black/10 dark:shadow-black/30">
         <CardHeader>
-          <CardTitle>Area protegida pronta</CardTitle>
+          <CardTitle>Área protegida pronta</CardTitle>
           <CardDescription>
-            Esta pagina valida a sessao no servidor consultando o backend antes
-            de renderizar qualquer conteudo sensivel.
+            Esta página valida a sessão no servidor consultando o backend antes
+            de renderizar qualquer conteúdo sensível.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 text-sm text-muted-foreground">
           <div className="flex items-start gap-3 rounded-xl border border-border/70 bg-muted/40 px-4 py-3">
             <ShieldCheckIcon className="mt-0.5 size-4 shrink-0 text-foreground" />
             <div>
-              <p className="font-medium text-foreground">Sessao validada</p>
+              <p className="font-medium text-foreground">Sessão validada</p>
               <p>
-                Usuario autenticado:{" "}
+                Usuário autenticado:{" "}
                 <span className="font-medium text-foreground">{user.name}</span>{" "}
                 ({user.email})
               </p>
@@ -37,10 +37,10 @@ export default async function PreferencesPage() {
           <div className="flex items-start gap-3 rounded-xl border border-border/70 bg-muted/40 px-4 py-3">
             <SparklesIcon className="mt-0.5 size-4 shrink-0 text-foreground" />
             <div>
-              <p className="font-medium text-foreground">Proximo passo</p>
+              <p className="font-medium text-foreground">Próximo passo</p>
               <p>
-                O proximo PR pode usar esta area protegida para listar e editar
-                preferencias de categorias consumindo os contratos ja existentes
+                O próximo PR pode usar esta área protegida para listar e editar
+                preferências de categorias consumindo os contratos já existentes
                 do backend.
               </p>
             </div>
