@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { LogoutButton } from "@/modules/auth/components/logout-button";
 import { AUTH_COOKIE_NAME } from "@/modules/auth/types/auth.constants";
 import { Button } from "@/shared/components/ui/button";
+import { ThemeToggle } from "@/shared/components/ui/theme-toggle";
 
 export default async function MainLayout({
   children,
@@ -49,6 +50,10 @@ export default async function MainLayout({
                 </Button>
               </>
             )}
+
+            <div className="ml-2 border-l border-border/70 pl-2">
+              <ThemeToggle />
+            </div>
           </nav>
         </div>
       </header>
