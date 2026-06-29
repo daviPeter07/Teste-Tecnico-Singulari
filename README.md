@@ -31,7 +31,6 @@ Além disso, também entrega bônus relevantes:
 |-- backend/
 |-- docs/
 |-- frontend/
-|-- .env.example
 |-- docker-compose.yml
 `-- README.md
 ```
@@ -73,6 +72,32 @@ Além disso, também entrega bônus relevantes:
 - documentação do frontend, backend e repositório
 - conteinerização do fluxo principal
 
+## Diagrama
+
+```text
+┌──────────────┐
+│   Frontend   │
+│ Next.js SPA  │
+└──────┬───────┘
+       │ /api/*
+       v
+┌──────────────┐
+│   Backend    │
+│ NestJS API   │
+└───┬────┬─────┘
+    │    │
+    │    └──────────────┐
+    v                   v
+┌──────────────┐   ┌──────────────┐
+│ PostgreSQL   │   │ Redis/BullMQ │
+└──────────────┘   └──────┬───────┘
+                          v
+                    ┌──────────────┐
+                    │    Worker    │
+                    │  Curadoria   │
+                    └──────────────┘
+```
+
 ## Como rodar
 
 ### Projeto completo pela raiz
@@ -80,7 +105,6 @@ Além disso, também entrega bônus relevantes:
 Crie os arquivos de ambiente:
 
 ```bash
-cp .env.example .env
 cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env
 ```
@@ -123,10 +147,6 @@ docker compose up --build
 Esse fluxo usa `frontend/docker-compose.yml`.
 
 ## Variáveis de ambiente
-
-### Raiz
-
-Use `.env.example` como base para portas e variáveis compartilhadas do ambiente local.
 
 ### Backend
 

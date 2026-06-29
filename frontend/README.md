@@ -71,10 +71,9 @@ NEXT_PUBLIC_API_URL="/api"
 BACKEND_INTERNAL_URL="http://localhost:3333"
 ```
 
-Arquivos de exemplo:
+Arquivo de exemplo:
 
 - `frontend/.env.example`
-- `.env.example`
 
 ## Como rodar
 
