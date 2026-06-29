@@ -104,47 +104,61 @@ export class CurationRepository extends PrismaRepository {
   }
 
   async registerSavedItem(runId: string) {
-    return this.prismaService.curationRun.update({
-      where: {
-        id: runId,
-      },
-      data: {
-        itemsProcessed: {
-          increment: 1,
+    return this.prismaService.$transaction(async (tx) => {
+      return tx.curationRun.update({
+        where: {
+          id: runId,
         },
-        itemsSaved: {
-          increment: 1,
+        data: {
+          itemsProcessed: {
+            increment: 1,
+          },
+          itemsSaved: {
+            increment: 1,
+          },
         },
-      },
+      });
     });
   }
 
   async registerFailedItem(runId: string, errorMessage: string) {
-    return this.prismaService.curationRun.update({
-      where: {
-        id: runId,
-      },
-      data: {
-        itemsProcessed: {
-          increment: 1,
+    return this.prismaService.$transaction(async (tx) => {
+      return tx.curationRun.update({
+        where: {
+          id: runId,
         },
-        itemsFailed: {
-          increment: 1,
+        data: {
+          itemsProcessed: {
+            increment: 1,
+          },
+          itemsFailed: {
+            increment: 1,
+          },
+          errorMessage,
         },
-        errorMessage,
-      },
+      });
     });
   }
 
-  finalizeRun(runId: string, status: CurationRunStatus) {
-    return this.prismaService.curationRun.update({
-      where: {
-        id: runId,
-      },
-      data: {
-        status,
-        finishedAt: new Date(),
-      },
+  async finalizeRun(runId: string, status: CurationRunStatus) {
+    return this.prismaService.$transaction(async (tx) => {
+      const run = await tx.curationRun.findUniqueOrThrow({
+        where: { id: runId },
+      });
+
+      if (run.finishedAt !== null) {
+        return run;
+      }
+
+      return tx.curationRun.update({
+        where: {
+          id: runId,
+        },
+        data: {
+          status,
+          finishedAt: new Date(),
+        },
+      });
     });
   }
 }

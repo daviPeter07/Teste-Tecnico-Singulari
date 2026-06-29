@@ -68,4 +68,12 @@ export class AuthRepository extends PrismaRepository {
       },
     });
   }
+
+  cleanupExpiredSessions() {
+    return this.prismaService.userSession.deleteMany({
+      where: {
+        OR: [{ expiresAt: { lt: new Date() } }, { revokedAt: { not: null } }],
+      },
+    });
+  }
 }

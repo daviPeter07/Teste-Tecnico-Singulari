@@ -60,7 +60,9 @@ export class CurationRunProcessor extends WorkerHost {
       }
 
       const items = this.curationAgentService.discoverNews(job.data);
-      this.logger.log(`Discovered ${items.length} items for curation run ${runId}.`);
+      this.logger.log(
+        `Discovered ${items.length} items for curation run ${runId}.`,
+      );
 
       const jobs = this.queueService.prepareNewsProcessingJobs(
         items.map((item) => ({
@@ -77,7 +79,9 @@ export class CurationRunProcessor extends WorkerHost {
       });
 
       await this.queueService.enqueueNewsProcessingJobs(jobs);
-      this.logger.log(`Queued ${jobs.length} news items for curation run ${runId}.`);
+      this.logger.log(
+        `Queued ${jobs.length} news items for curation run ${runId}.`,
+      );
 
       await job.updateProgress(100);
 
@@ -102,10 +106,7 @@ export class CurationRunProcessor extends WorkerHost {
           error instanceof Error ? error.stack : undefined,
         );
 
-        await this.curationRepository.markRunAsFailed(
-          runId,
-          errorMessage,
-        );
+        await this.curationRepository.markRunAsFailed(runId, errorMessage);
       }
 
       throw error;

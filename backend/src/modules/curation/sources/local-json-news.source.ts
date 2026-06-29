@@ -39,7 +39,9 @@ export class LocalJsonNewsSource {
         sourceUrl: 'file://tech-signals.json',
         url: `https://local-signals.example.com/insights/${signal.slug}-${seed}-${index + 1}`,
         content: `Uma analise local do time ${signal.team} mostrou ${trendDirection} em ${signal.signal}. O indicador saiu de ${signal.previousValue}${signal.unit} para ${signal.currentValue}${signal.unit} ao observar ${signal.topic}. ${signal.impact}`,
-        publishedAt: new Date(baseTimestamp - index * 1000 * 60 * 60 * 4).toISOString(),
+        publishedAt: new Date(
+          baseTimestamp - index * 1000 * 60 * 60 * 4,
+        ).toISOString(),
         categorySlug: signal.categorySlug,
       };
     });
@@ -68,15 +70,7 @@ export class LocalJsonNewsSource {
   }
 
   private loadSignals(): TechSignal[] {
-    const datasetPath = join(
-      process.cwd(),
-      'src',
-      'modules',
-      'curation',
-      'sources',
-      'data',
-      'tech-signals.json',
-    );
+    const datasetPath = join(__dirname, 'data', 'tech-signals.json');
 
     return JSON.parse(readFileSync(datasetPath, 'utf-8')) as TechSignal[];
   }

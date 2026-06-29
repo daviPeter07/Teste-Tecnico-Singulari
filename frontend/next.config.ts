@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
-const backendInternalUrl = process.env.BACKEND_INTERNAL_URL ?? "http://localhost:3333";
+const backendInternalUrl =
+  process.env.BACKEND_INTERNAL_URL ?? "http://localhost:3333";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,

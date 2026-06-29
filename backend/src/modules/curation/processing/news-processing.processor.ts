@@ -88,7 +88,9 @@ export class NewsProcessingProcessor extends WorkerHost {
     } catch (error) {
       const isLastAttempt = job.attemptsMade + 1 >= maxAttempts;
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown news processing error';
+        error instanceof Error
+          ? error.message
+          : 'Unknown news processing error';
 
       if (!isLastAttempt) {
         this.logger.warn(
@@ -137,9 +139,7 @@ export class NewsProcessingProcessor extends WorkerHost {
     }
 
     const status = this.curationRunDomain.getFinalStatus(run);
-    this.logger.log(
-      `Finalizing curation run ${runId} with status ${status}.`,
-    );
+    this.logger.log(`Finalizing curation run ${runId} with status ${status}.`);
 
     return this.curationRepository.finalizeRun(runId, status);
   }

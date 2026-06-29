@@ -1,27 +1,23 @@
 import { Controller, Get } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Public } from '../../common/auth/public.decorator';
 import { PreferenceResponseDto } from './dto/preferences-response.dto';
 import { PreferencesService } from './preferences.service';
 
 @ApiTags('Preferences')
-@ApiBearerAuth('jwt')
 @Controller('preferences')
 export class PreferencesController {
   constructor(private readonly preferencesService: PreferencesService) {}
 
+  @Public()
   @Get()
   @ApiOperation({
-    summary: 'List available preferences',
+    summary: 'List available categories',
     description:
-      'Returns all available news categories that can be used as user preferences.',
+      'Returns all available news categories. Can be used for filtering and user preferences.',
   })
   @ApiOkResponse({
-    description: 'Available news categories for preferences',
+    description: 'Available news categories',
     type: PreferenceResponseDto,
     isArray: true,
   })

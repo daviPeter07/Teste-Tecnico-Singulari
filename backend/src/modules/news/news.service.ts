@@ -7,6 +7,7 @@ import {
   createPaginatedResponse,
   getPaginationParams,
 } from '../../common/pagination/pagination.util';
+import type { AuthenticatedUser } from '../../common/auth/authenticated-user.type';
 
 @Injectable()
 export class NewsService {
@@ -14,12 +15,21 @@ export class NewsService {
 
   async findMany(
     query: ListNewsQueryDto,
+    user: AuthenticatedUser | null,
   ): Promise<PaginatedResponse<NewsResponseDto>> {
     const { page, limit, skip, take } = getPaginationParams(query);
+
+    let preferredCategorySlugs: string[] | undefined;
+
+    if (user && !query.category) {
+      preferredCategorySlugs =
+        await this.newsRepository.findPreferredCategorySlugs(user.id);
+    }
 
     const filters = {
       publishedAtFrom: this.getPublishedAtFrom(query.period),
       categorySlug: query.category,
+      categorySlugsIn: preferredCategorySlugs,
     };
 
     const [news, total] = await Promise.all([

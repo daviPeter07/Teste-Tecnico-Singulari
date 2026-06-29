@@ -39,7 +39,9 @@ describe('CurationAgentService', () => {
 
   it('delegates local-json runs to the structured local source', () => {
     // Garante que a estrategia local-json do agente usa a fonte estruturada de sinais locais.
-    localJsonNewsSource.generate.mockReturnValue([{ title: 'local insight' }] as never);
+    localJsonNewsSource.generate.mockReturnValue([
+      { title: 'local insight' },
+    ] as never);
 
     const result = service.discoverNews({
       runId: 'run-1',

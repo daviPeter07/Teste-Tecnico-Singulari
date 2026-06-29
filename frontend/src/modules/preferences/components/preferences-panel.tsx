@@ -68,7 +68,8 @@ export function PreferencesPanel({
                 </EmptyMedia>
                 <EmptyTitle>Nenhuma categoria disponível</EmptyTitle>
                 <EmptyDescription>
-                  O backend ainda não retornou categorias para selecionar.
+                  Nenhuma categoria disponível no momento. Tente novamente mais
+                  tarde.
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>

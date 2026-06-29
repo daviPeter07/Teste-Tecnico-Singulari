@@ -79,7 +79,10 @@ describe('CurationService', () => {
 
   it('accepts local-json as a valid high-code source for the curation agent', async () => {
     // Garante que a API consegue enfileirar a fonte local-json como estrategia oficial do agente.
-    curationRepository.createRun.mockResolvedValue({ ...run, sourceType: 'local-json' } as never);
+    curationRepository.createRun.mockResolvedValue({
+      ...run,
+      sourceType: 'local-json',
+    } as never);
     queueService.enqueueCurationRunJob.mockResolvedValue({
       id: 'curation-run-run-1',
     } as never);
