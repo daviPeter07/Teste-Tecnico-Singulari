@@ -55,6 +55,7 @@ export const authService = {
       sameSite: "lax",
       secure: isProduction,
       path: "/",
+      maxAge: 86400,
     });
   },
 
@@ -88,7 +89,6 @@ export const authService = {
       return await apiClient.get<AuthUser>("/me", { token });
     } catch (error) {
       if (error instanceof ApiError && error.statusCode === 401) {
-        await this.clearSession();
         return null;
       }
 
@@ -100,7 +100,7 @@ export const authService = {
     const user = await this.getCurrentUser();
 
     if (!user) {
-      redirect(AUTH_LOGIN_PATH);
+      redirect(`${AUTH_LOGIN_PATH}?clear_session=1`);
     }
 
     return user;
