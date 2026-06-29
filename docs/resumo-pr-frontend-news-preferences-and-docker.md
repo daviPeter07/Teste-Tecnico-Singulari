@@ -1,51 +1,14 @@
-# Resumo do PR `feat/fullstack-news-preferences-and-docker`
+# Resumo do PR `Feature/frontend-implement-news-and-preferences`
 
-## Título sugerido do PR
+Este PR evolui a entrega full stack da Newsletter Inteligente com foco em organização do frontend, nova experiência da home de notícias, edição de preferências do usuário, dockerização do fluxo principal e ajustes de integração entre frontend e backend.
 
-`feat(fullstack): finalize news feed, user preferences and dockerized app flow`
-
-## Visão geral
-
-Este PR consolida a entrega full stack do desafio da Newsletter Inteligente com foco em:
-
-- experiência principal de notícias no frontend
-- edição de preferências do usuário
-- organização modular do frontend por camadas
-- dockerização do fluxo completo
-- correções de bootstrap e integração entre frontend e backend
-- documentação consolidada do repositório
-
-O resultado final aproxima o projeto do fluxo completo descrito no desafio, cobrindo não só o essencial, mas também boa parte dos bônus pedidos.
-
-## Aderência ao documento do desafio
-
-### Essencial entregue
-
-Com base no documento em `docs/teste_singu-desenvolvedor-pleno.extracted.txt`, este PR ajuda a consolidar os pontos essenciais já existentes no projeto:
-
-- backend servindo notícias com `GET /news`
-- filtro por período `day|week|month`
-- paginação de notícias
-- frontend mostrando notícias em SPA
-- cards de notícias com interface responsiva
-- agente curador em worker separado
-- compose subindo frontend, backend, worker, banco e Redis
-
-### Bônus entregues ou consolidados neste PR
-
-- login e cadastro integrados ao frontend
-- tela protegida de preferências
-- edição de preferências do usuário
-- mensageria desacoplada com Redis e BullMQ
-- resumo por IA no backend
-- documentação mais completa
-- conteinerização do fluxo principal
+O objetivo principal foi aproximar a aplicação do fluxo esperado no desafio: frontend consumindo notícias reais, tela de preferências usando os endpoints já existentes, e ambiente completo rodando de forma mais previsível com Docker.
 
 ## O que entrou neste PR
 
-### Reorganização modular do frontend
+### Reorganização do frontend por módulos e camadas
 
-O frontend foi reorganizado para seguir a estrutura por domínio e camada, com separação explícita entre:
+O frontend foi reorganizado para seguir uma estrutura modular mais clara, separando responsabilidades em:
 
 - `pages`
 - `components`
@@ -55,108 +18,123 @@ O frontend foi reorganizado para seguir a estrutura por domínio e camada, com s
 - `schemas`
 - `types`
 
-Módulos diretamente afetados:
+Arquivos principais:
 
-- `auth`
-- `news`
-- `preferences`
+- `frontend/src/modules/news/pages/home-page.tsx`
+- `frontend/src/modules/news/queries/news-list.query.ts`
+- `frontend/src/modules/news/hooks/use-news-list-query.ts`
+- `frontend/src/modules/preferences/pages/preferences-page.tsx`
+- `frontend/src/modules/preferences/hooks/use-preferences-form.ts`
+- `frontend/src/modules/auth/hooks/use-login-form.ts`
+- `frontend/src/modules/auth/hooks/use-register-form.ts`
 
 Com isso:
 
 - os arquivos de `app/` ficaram mais finos
-- a regra de negócio saiu das páginas
-- a manutenção do frontend ficou mais previsível
+- a lógica saiu das páginas e foi para os módulos
+- `news`, `auth` e `preferences` passaram a seguir a mesma organização
 
-### Novo fluxo da home de notícias
+### Nova home de notícias com filtros e paginação
 
-A home foi redesenhada para atender melhor ao que o PDF pede para o frontend:
-
-- filtros no topo
-- grid de notícias
-- paginação visível
-- layout mais direto e sem elementos visuais desnecessários
-- comportamento responsivo
+A home pública foi redesenhada para refletir melhor o escopo pedido no desafio.
 
 Arquivos principais:
 
-- `frontend/src/modules/news/pages/home-page.tsx`
 - `frontend/src/modules/news/components/news-feed.tsx`
 - `frontend/src/modules/news/components/news-card.tsx`
 - `frontend/src/modules/news/components/news-filters.tsx`
 - `frontend/src/modules/news/components/news-grid.tsx`
 - `frontend/src/modules/news/components/news-pagination.tsx`
-- `frontend/src/modules/news/queries/news-list.query.ts`
-- `frontend/src/modules/news/hooks/use-news-list-query.ts`
+- `frontend/src/modules/news/services/news.service.ts`
+- `frontend/src/app/(main)/page.tsx`
 
-### Preferências do usuário no frontend
+O fluxo implementado passou a oferecer:
 
-O fluxo de preferências foi componentizado e passou a refletir melhor os endpoints já existentes no backend.
+- listagem de notícias em grid
+- filtros por período
+- paginação visível no frontend
+- consumo da consulta paginada do backend
+- layout responsivo para desktop e mobile
 
-Entraram componentes e hooks dedicados para:
+### Edição de preferências do usuário
 
-- sessão do usuário
-- feedback de carregamento e erro
-- seleção de categorias
-- submissão das alterações
+O módulo de preferências foi componentizado e passou a usar de forma mais clara os endpoints protegidos do backend.
 
 Arquivos principais:
 
-- `frontend/src/modules/preferences/pages/preferences-page.tsx`
 - `frontend/src/modules/preferences/components/preferences-panel.tsx`
 - `frontend/src/modules/preferences/components/preferences-feedback.tsx`
 - `frontend/src/modules/preferences/components/preferences-selection-form.tsx`
 - `frontend/src/modules/preferences/components/preferences-session-card.tsx`
-- `frontend/src/modules/preferences/hooks/use-preferences-form.ts`
+- `frontend/src/modules/preferences/services/preferences.service.ts`
+- `frontend/src/modules/preferences/pages/preferences-page.tsx`
+- `frontend/src/app/(main)/preferences/page.tsx`
 
-### Melhorias no módulo de autenticação
+Com isso:
 
-O PR também refinou a base de autenticação do frontend:
+- a tela de preferências passou a exibir as categorias disponíveis
+- o usuário autenticado consegue ver suas preferências atuais
+- a atualização das preferências passou a acontecer pela interface
+- o frontend passou a aproveitar melhor os endpoints já existentes no backend
 
-- separação maior entre formulário e regra
-- hooks específicos para login e cadastro
-- leitura de sessão no servidor
-- correção da integração server-side com `/me`
+### Refinos no módulo de autenticação
+
+O frontend também recebeu ajustes na base de autenticação para manter a sessão e a integração com o backend mais consistentes.
 
 Arquivos principais:
 
-- `frontend/src/modules/auth/hooks/use-login-form.ts`
-- `frontend/src/modules/auth/hooks/use-register-form.ts`
 - `frontend/src/modules/auth/services/auth.service.ts`
-- `frontend/src/shared/lib/http/api-client.ts`
+- `frontend/src/modules/auth/services/auth.actions.ts`
+- `frontend/src/modules/auth/components/login-form.tsx`
+- `frontend/src/modules/auth/components/register-form.tsx`
+- `frontend/src/proxy.ts`
 
-### Dockerização do projeto completo
+Com isso:
 
-Foi adicionada a infraestrutura para subir o projeto full stack com Docker Compose.
+- login e cadastro ficaram mais desacoplados dos componentes
+- as páginas protegidas continuam validando a sessão no servidor
+- a integração com `GET /me` e com o cookie de sessão foi mantida no fluxo principal
 
-Entraram:
+### Dockerização do frontend e do projeto completo
 
-- `docker-compose.yml` na raiz
+Foi adicionada a estrutura para subir tanto o frontend isolado quanto o projeto completo com Docker Compose.
+
+Arquivos principais:
+
+- `docker-compose.yml`
+- `frontend/docker-compose.yml`
 - `frontend/Dockerfile`
 - `frontend/.dockerignore`
-- `frontend/docker-compose.yml`
-- `.env.example` na raiz
+- `.env.example`
 - `frontend/.env.example`
 
-Além disso, a estratégia de bootstrap foi refinada:
+Com isso:
 
-- o backend deixou de depender de um serviço `migrate` permanente
-- a API passou a executar migrations e seed ao subir o container
-- `frontend` e `worker` passaram a esperar a saúde do `api`
+- o projeto ganhou um compose na raiz para frontend, backend, worker, banco e Redis
+- o frontend ganhou um compose próprio para rodar separado
+- foram adicionados arquivos de ambiente de exemplo para o fluxo local
+
+### Ajustes de bootstrap e startup no Docker
+
+Durante a subida do ambiente completo foram corrigidos problemas reais de inicialização do backend e sincronização entre os serviços.
 
 Arquivos principais:
 
 - `backend/Dockerfile`
 - `backend/docker/start-service.sh`
 - `docker-compose.yml`
+- `backend/docker-compose.yaml`
+
+Mudanças aplicadas:
+
+- remoção da dependência de um serviço `migrate` como fluxo principal
+- execução de migration e seed no startup do container da API
+- health check da API para coordenar a subida de frontend e worker
+- ajuste das variáveis carregadas pelos serviços no compose
 
 ### Correções de integração entre frontend e backend
 
-Foram corrigidos problemas de runtime que apareceram durante a subida do ambiente:
-
-- `fetch("/api/...")` quebrando no server-side do Next
-- frontend subindo antes da API estar saudável
-- conflito entre compose, rewrite e acesso interno à API
-- resolução incorreta de URL no servidor
+Foram corrigidos problemas de runtime na comunicação entre Next.js e a API.
 
 Arquivos principais:
 
@@ -164,20 +142,30 @@ Arquivos principais:
 - `frontend/next.config.ts`
 - `docker-compose.yml`
 
-### Documentação do repositório
+Com isso:
 
-A documentação foi consolidada e revisada para refletir melhor o estado atual do projeto.
+- o frontend passou a montar URLs corretas no server-side
+- o proxy do Next ficou alinhado ao backend em `localhost:3333`
+- a tela de preferências deixou de quebrar por URL relativa inválida
 
-Entraram ou foram ajustados:
+### Documentação consolidada
 
-- `README.md` da raiz
+Este PR também atualizou a documentação para refletir a organização atual do repositório.
+
+Arquivos:
+
+- `README.md`
 - `frontend/README.md`
 - `backend/README.md`
-- `.env.example`
+
+Foram adicionados ou ajustados:
+
+- README global do projeto
+- instruções para rodar com Docker
+- arquivos `.env.example`
+- referências do repositório sem caminhos específicos da máquina local
 
 ## Commits deste PR
-
-Commits locais relacionados a este escopo:
 
 - `c42879f` `fix(backend): stabilize docker startup for api and worker`
 - `da33793` `refactor(frontend): organize modules by layer`
@@ -195,49 +183,93 @@ Commits locais relacionados a este escopo:
 - `baca09a` `docs(readme): replace machine-specific paths`
 - `35917de` `docs(readme): fix text encoding and accents`
 
-## Arquivos mais relevantes do PR
+## Arquivos alterados no PR
 
-### Frontend
-
+- `.env.example`
+- `README.md`
+- `backend/Dockerfile`
+- `backend/README.md`
+- `backend/docker-compose.yaml`
+- `backend/docker/start-service.sh`
+- `docker-compose.yml`
+- `docs/teste_singu-desenvolvedor-pleno.extracted.txt`
+- `frontend/.dockerignore`
+- `frontend/.env.example`
+- `frontend/.gitignore`
+- `frontend/Dockerfile`
+- `frontend/README.md`
+- `frontend/docker-compose.yml`
+- `frontend/next.config.ts`
+- `frontend/package.json`
+- `frontend/src/app/(main)/layout.tsx`
 - `frontend/src/app/(main)/page.tsx`
 - `frontend/src/app/(main)/preferences/page.tsx`
-- `frontend/src/modules/news/pages/home-page.tsx`
-- `frontend/src/modules/news/components/news-feed.tsx`
-- `frontend/src/modules/news/components/news-pagination.tsx`
-- `frontend/src/modules/news/queries/news-list.query.ts`
-- `frontend/src/modules/preferences/pages/preferences-page.tsx`
-- `frontend/src/modules/preferences/components/preferences-selection-form.tsx`
-- `frontend/src/modules/preferences/hooks/use-preferences-form.ts`
+- `frontend/src/modules/auth/components/login-form.tsx`
+- `frontend/src/modules/auth/components/logout-button.tsx`
+- `frontend/src/modules/auth/components/register-form.tsx`
 - `frontend/src/modules/auth/hooks/use-login-form.ts`
 - `frontend/src/modules/auth/hooks/use-register-form.ts`
+- `frontend/src/modules/auth/services/auth.actions.ts`
+- `frontend/src/modules/auth/services/auth.service.ts`
+- `frontend/src/modules/auth/types/auth.constants.ts`
+- `frontend/src/modules/news/components/news-card.tsx`
+- `frontend/src/modules/news/components/news-feed.tsx`
+- `frontend/src/modules/news/components/news-filters.tsx`
+- `frontend/src/modules/news/components/news-grid.tsx`
+- `frontend/src/modules/news/components/news-list.tsx`
+- `frontend/src/modules/news/components/news-pagination.tsx`
+- `frontend/src/modules/news/hooks/use-news-list-query.ts`
+- `frontend/src/modules/news/pages/home-page.tsx`
+- `frontend/src/modules/news/queries/news-list.query.ts`
+- `frontend/src/modules/news/services/news.service.ts`
+- `frontend/src/modules/news/types/news.types.ts`
+- `frontend/src/modules/preferences/components/preferences-feedback.tsx`
+- `frontend/src/modules/preferences/components/preferences-panel.tsx`
+- `frontend/src/modules/preferences/components/preferences-selection-form.tsx`
+- `frontend/src/modules/preferences/components/preferences-session-card.tsx`
+- `frontend/src/modules/preferences/hooks/use-preferences-form.ts`
+- `frontend/src/modules/preferences/pages/preferences-page.tsx`
+- `frontend/src/modules/preferences/schemas/preferences.schema.ts`
+- `frontend/src/modules/preferences/services/preferences.actions.ts`
+- `frontend/src/modules/preferences/services/preferences.service.ts`
+- `frontend/src/proxy.ts`
 - `frontend/src/shared/lib/http/api-client.ts`
-- `frontend/next.config.ts`
 
-### Infra
+Arquivos removidos:
 
-- `docker-compose.yml`
-- `frontend/docker-compose.yml`
-- `frontend/Dockerfile`
-- `backend/Dockerfile`
-- `backend/docker/start-service.sh`
-- `.env.example`
-
-### Documentação
-
-- `README.md`
-- `frontend/README.md`
-- `backend/README.md`
+- `frontend/src/modules/news/.gitkeep`
+- `frontend/src/modules/news/components/.gitkeep`
+- `frontend/src/modules/news/hooks/use-news-query.ts`
+- `frontend/src/modules/news/news.constants.ts`
+- `frontend/src/modules/news/news.query-state.ts`
+- `frontend/src/modules/news/pages/.gitkeep`
+- `frontend/src/modules/news/queries/.gitkeep`
+- `frontend/src/modules/news/schemas/.gitkeep`
+- `frontend/src/modules/news/services/.gitkeep`
+- `frontend/src/modules/news/types/.gitkeep`
+- `frontend/src/modules/preferences/.gitkeep`
+- `frontend/src/modules/preferences/components/.gitkeep`
+- `frontend/src/modules/preferences/pages/.gitkeep`
+- `frontend/src/modules/preferences/queries/.gitkeep`
+- `frontend/src/modules/preferences/schemas/.gitkeep`
+- `frontend/src/modules/preferences/services/.gitkeep`
+- `frontend/src/modules/preferences/types/.gitkeep`
 
 ## Resultado final deste PR
 
 Ao final deste PR, o projeto passa a oferecer:
 
-- home de notícias mais próxima do escopo visual e funcional do desafio
-- paginação no frontend conectada ao backend
-- filtros por período integrados
-- preferências do usuário funcionando de ponta a ponta no frontend
 - frontend organizado por módulos e camadas
-- compose principal para subir o fluxo completo
+- home de notícias com filtros e paginação
+- edição de preferências do usuário pela interface
+- integração mais consistente entre frontend e backend
+- compose completo para subir frontend, backend, worker, banco e Redis
 - compose isolado para o frontend
-- bootstrap do backend mais estável no Docker
-- documentação consolidada da solução
+- bootstrap do backend mais previsível no Docker
+- documentação consolidada para o repositório
+
+## Observações rápidas
+
+- este PR consolida boa parte dos bônus do desafio no frontend e na infraestrutura
+- o backend real continua exposto em `localhost:3333`
+- o resumo automático por IA e a mensageria continuam do lado do backend e worker, não do frontend
