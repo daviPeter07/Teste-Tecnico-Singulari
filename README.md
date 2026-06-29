@@ -1,14 +1,14 @@
 # Newsletter Inteligente
 
-Aplicação full stack para o desafio da Newsletter Inteligente, com frontend em Next.js e backend em NestJS.
+Aplicacao full stack para o desafio da Newsletter Inteligente, com frontend em Next.js e backend em NestJS.
 
 O projeto cobre o fluxo principal pedido no teste:
 
-- backend servindo notícias com paginação e filtro por período
-- frontend exibindo as notícias em SPA
+- backend servindo noticias com paginacao e filtro por periodo
+- frontend exibindo as noticias em SPA
 - agente curador rodando em worker separado
 - banco relacional com PostgreSQL
-- filas assíncronas com Redis e BullMQ
+- filas assincronas com Redis e BullMQ
 - Docker Compose para subir o ambiente completo
 
 ## Estrutura
@@ -22,20 +22,20 @@ O projeto cobre o fluxo principal pedido no teste:
 `-- README.md
 ```
 
-## Módulos principais
+## Modulos principais
 
 ### Frontend
 
-- `auth`: login, cadastro, sessão e logout
-- `news`: listagem, filtros e paginação
-- `preferences`: leitura e edição de preferências
+- `auth`: login, cadastro, sessao e logout
+- `news`: listagem, filtros e paginacao
+- `preferences`: leitura e edicao de preferencias
 
 ### Backend
 
 - `auth`: cadastro, login, logout e JWT
-- `news`: listagem pública de notícias
-- `preferences` e `users`: preferências do usuário autenticado
-- `curation`: agente, enriquecimento e acompanhamento de execução
+- `news`: listagem publica de noticias
+- `preferences` e `users`: preferencias do usuario autenticado
+- `curation`: agente, enriquecimento e acompanhamento de execucao
 - `queue`: filas BullMQ
 - `ai`: provedor de resumo
 - `health`: health check
@@ -65,7 +65,7 @@ docker compose down --remove-orphans
 docker compose up -d --build
 ```
 
-Serviços expostos:
+Servicos expostos:
 
 - frontend: `http://localhost:3000`
 - backend: `http://localhost:3333`
@@ -75,25 +75,25 @@ Serviços expostos:
 
 ### Frontend isolado
 
-Com o backend já rodando em `localhost:3333`:
+Com o backend ja rodando em `localhost:3333`:
 
 ```bash
 docker compose -f frontend/docker-compose.yml up --build
 ```
 
-## Variáveis de ambiente
+## Variaveis de ambiente
 
 ### Raiz
 
-Use [.env.example](/C:/Users/Peterson/Desktop/projects/teste-singu-pleno/.env.example:1) como base para portas e variáveis compartilhadas do ambiente local.
+Use `.env.example` como base para portas e variaveis compartilhadas do ambiente local.
 
 ### Backend
 
-Use [backend/.env.example](/C:/Users/Peterson/Desktop/projects/teste-singu-pleno/backend/.env.example:1).
+Use `backend/.env.example`.
 
 ### Frontend
 
-Use [frontend/.env.example](/C:/Users/Peterson/Desktop/projects/teste-singu-pleno/frontend/.env.example:1).
+Use `frontend/.env.example`.
 
 ## Fluxo atual
 
@@ -104,8 +104,8 @@ Backend -> Redis/BullMQ
 Worker -> Redis/BullMQ -> PostgreSQL
 ```
 
-## Documentação complementar
+## Documentacao complementar
 
-- Backend: [backend/README.md](/C:/Users/Peterson/Desktop/projects/teste-singu-pleno/backend/README.md:1)
-- Frontend: [frontend/README.md](/C:/Users/Peterson/Desktop/projects/teste-singu-pleno/frontend/README.md:1)
-- Requisitos do desafio: [docs/teste_singu-desenvolvedor-pleno.extracted.txt](/C:/Users/Peterson/Desktop/projects/teste-singu-pleno/docs/teste_singu-desenvolvedor-pleno.extracted.txt:1)
+- Backend: `backend/README.md`
+- Frontend: `frontend/README.md`
+- Requisitos do desafio: `docs/teste_singu-desenvolvedor-pleno.extracted.txt`
