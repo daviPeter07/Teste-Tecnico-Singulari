@@ -13,11 +13,6 @@ export type UpdatePreferencesActionState = {
   savedIds: string[];
 };
 
-const INITIAL_STATE: UpdatePreferencesActionState = {
-  status: "idle",
-  savedIds: [],
-};
-
 function getPreferenceIds(preferences: Preference[]) {
   return [...preferences].map((preference) => preference.id).sort();
 }
@@ -31,16 +26,16 @@ function getActionErrorMessage(error: ApiError) {
 }
 
 export async function updateMyPreferencesAction(
-  _previousState: UpdatePreferencesActionState,
+  previousState: UpdatePreferencesActionState,
   formData: FormData,
 ): Promise<UpdatePreferencesActionState> {
   const token = await authService.getSessionToken();
 
   if (!token) {
     return {
+      ...previousState,
       status: "error",
       message: "Sua sessão expirou. Faça login novamente.",
-      savedIds: [],
     };
   }
 
@@ -53,9 +48,9 @@ export async function updateMyPreferencesAction(
 
   if (!parsed.success) {
     return {
+      ...previousState,
       status: "error",
       message: "Não foi possível salvar suas preferências agora.",
-      savedIds: [],
     };
   }
 
@@ -80,17 +75,16 @@ export async function updateMyPreferencesAction(
       }
 
       return {
+        ...previousState,
         status: "error",
         message: getActionErrorMessage(error),
-        savedIds: [],
       };
     }
 
     return {
+      ...previousState,
       status: "error",
       message: "Não foi possível salvar suas preferências agora.",
-      savedIds: [],
     };
   }
 }
-

@@ -87,7 +87,7 @@ Com isso:
 - `POST /login` para autenticação
 - `POST /logout` para encerrar a sessão atual
 - `GET /me` para perfil autenticado
-- `GET /preferences`
+- `GET /preferences` para listar categorias disponÃ­veis
 - `GET /users/me/preferences`
 - `PUT /users/me/preferences`
 - mensageria assíncrona com BullMQ + Redis
@@ -333,6 +333,7 @@ Para teste manual do fluxo completo, use:
 
 - `GET /health`
 - `GET /news`
+- `GET /preferences`
 - `POST /users`
 - `POST /login`
 
@@ -340,7 +341,6 @@ Para teste manual do fluxo completo, use:
 
 - `GET /me`
 - `POST /logout`
-- `GET /preferences`
 - `GET /users/me/preferences`
 - `PUT /users/me/preferences`
 - `POST /curation/run`

@@ -32,10 +32,11 @@ export function NewsFeed({
   const [period, setPeriod] = useQueryState("period", newsPeriodParser);
   const [page, setPage] = useQueryState("page", newsPageParser);
   const [category, setCategory] = useQueryState("category", newsCategoryParser);
+  const safePage = page > 0 ? page : 1;
 
   const newsQuery = useNewsListQuery({
     category: category ?? undefined,
-    page,
+    page: safePage,
     limit: NEWS_PAGE_LIMIT,
     period,
   });
@@ -72,7 +73,7 @@ export function NewsFeed({
 
       <div id="news-grid">
         <NewsList
-          currentPage={page}
+          currentPage={safePage}
           errorMessage={errorMessage}
           hasError={newsQuery.isError}
           isLoading={newsQuery.isPending}

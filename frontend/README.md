@@ -128,6 +128,7 @@ Protegidas:
 Públicas:
 
 - `GET /news`
+- `GET /preferences`
 - `POST /users`
 - `POST /login`
 
@@ -135,7 +136,6 @@ Autenticadas:
 
 - `GET /me`
 - `POST /logout`
-- `GET /preferences`
 - `GET /users/me/preferences`
 - `PUT /users/me/preferences`
 

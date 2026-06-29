@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
+import type { AuthenticatedUser } from '../../../common/auth/authenticated-user.type';
 import { IS_PUBLIC_KEY } from '../../../common/auth/public.decorator';
 
 @Injectable()
@@ -13,7 +14,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     super();
   }
 
-  handleRequest<TUser = any>(
+  handleRequest<TUser = AuthenticatedUser | null>(
     err: unknown,
     user: unknown,
     info: unknown,
