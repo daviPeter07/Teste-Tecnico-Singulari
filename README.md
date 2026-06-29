@@ -71,6 +71,8 @@ Além disso, também entrega bônus relevantes:
 - resumo por IA no backend
 - documentação do frontend, backend e repositório
 - conteinerização do fluxo principal
+- **tema claro/escuro (dark mode)** com troca dinâmica no frontend
+- **código estrito** sem uso de tipos `any` e totalmente checado (Biome + ESLint)
 
 ## Diagrama
 
