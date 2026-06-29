@@ -4,11 +4,13 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: newsletter_frontend
+    env_file:
+      - ./frontend/.env
     environment:
-      BACKEND_INTERNAL_URL: http://api:${PORT}
+      BACKEND_INTERNAL_URL: http://api:3333
       NEXT_PUBLIC_API_URL: /api
     ports:
-      - "${FRONTEND_PORT}:3000"
+      - "3000:3000"
     volumes:
       - ./frontend:/app
       - frontend_node_modules:/app/node_modules
@@ -23,28 +25,15 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: newsletter_api
+    env_file:
+      - ./backend/.env
     environment:
       CI: "true"
-      NODE_ENV: development
-      PORT: ${PORT}
-      CORS_ORIGIN: ${CORS_ORIGIN}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/newsletter_db?schema=public
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      AI_PROVIDER: ${AI_PROVIDER}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      OPENAI_MODEL: ${OPENAI_MODEL}
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
-      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL}
-      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
-      OPENROUTER_MODEL: ${OPENROUTER_MODEL}
     ports:
-      - "${PORT}:${PORT}"
+      - "3333:3333"
     volumes:
       - ./backend:/app
       - backend_api_node_modules:/app/node_modules
@@ -60,25 +49,13 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: newsletter_worker
+    env_file:
+      - ./backend/.env
     environment:
       CI: "true"
-      NODE_ENV: development
-      PORT: ${PORT}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/newsletter_db?schema=public
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      AI_PROVIDER: ${AI_PROVIDER}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      OPENAI_MODEL: ${OPENAI_MODEL}
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
-      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL}
-      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
-      OPENROUTER_MODEL: ${OPENROUTER_MODEL}
     volumes:
       - ./backend:/app
       - backend_worker_node_modules:/app/node_modules
@@ -94,24 +71,13 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: newsletter_migrate
+    env_file:
+      - ./backend/.env
     environment:
       CI: "true"
-      NODE_ENV: development
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/newsletter_db?schema=public
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      AI_PROVIDER: ${AI_PROVIDER}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      OPENAI_MODEL: ${OPENAI_MODEL}
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
-      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL}
-      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
-      OPENROUTER_MODEL: ${OPENROUTER_MODEL}
     depends_on:
       postgres:
         condition: service_healthy
@@ -120,16 +86,14 @@ services:
   postgres:
     image: postgres:17-alpine
     container_name: newsletter_db
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    env_file:
+      - ./backend/.env
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d newsletter_db"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -138,7 +102,7 @@ services:
     image: redis:8-alpine
     container_name: newsletter_redis
     ports:
-      - "${REDIS_PORT}:6379"
+      - "6379:6379"
     volumes:
       - redis_data:/data
 
