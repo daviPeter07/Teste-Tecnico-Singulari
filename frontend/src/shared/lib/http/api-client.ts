@@ -6,14 +6,7 @@ type ApiClientOptions = Omit<RequestInit, "body"> & {
 };
 
 const getApiBaseUrl = () => {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL;
-
-  if (!baseUrl) {
-    throw new Error(
-      "Missing API base URL. Set NEXT_PUBLIC_API_URL for the frontend runtime.",
-    );
-  }
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 
   return baseUrl.replace(/\/$/, "");
 };
