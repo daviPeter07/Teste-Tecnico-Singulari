@@ -5,22 +5,33 @@ type ApiClientOptions = Omit<RequestInit, "body"> & {
   token?: string;
 };
 
-const getApiBaseUrl = () => {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL;
+const normalizeBaseUrl = (baseUrl: string) => baseUrl.replace(/\/$/, "");
 
-  if (!baseUrl) {
-    throw new Error(
-      "Missing API base URL. Set NEXT_PUBLIC_API_URL for the frontend runtime.",
-    );
+const isAbsoluteUrl = (value: string) => /^https?:\/\//.test(value);
+
+const getApiBaseUrl = async () => {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "/api";
+
+  if (typeof window !== "undefined" || isAbsoluteUrl(baseUrl)) {
+    return normalizeBaseUrl(baseUrl);
   }
 
-  return baseUrl.replace(/\/$/, "");
+  const { headers } = await import("next/headers");
+  const requestHeaders = await headers();
+  const protocol = requestHeaders.get("x-forwarded-proto") ?? "http";
+  const host =
+    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+
+  if (!host) {
+    throw new Error("Missing host header while building server API URL.");
+  }
+
+  return `${protocol}://${host}${normalizeBaseUrl(baseUrl)}`;
 };
 
-const buildUrl = (path: string) => {
+const buildUrl = async (path: string) => {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${getApiBaseUrl()}${normalizedPath}`;
+  return `${await getApiBaseUrl()}${normalizedPath}`;
 };
 
 const buildHeaders = (options: ApiClientOptions) => {
@@ -45,7 +56,7 @@ async function request<T>(
   path: string,
   options: ApiClientOptions = {},
 ): Promise<T> {
-  const response = await fetch(buildUrl(path), {
+  const response = await fetch(await buildUrl(path), {
     ...options,
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
     headers: buildHeaders(options),
@@ -68,4 +79,6 @@ export const apiClient = {
     request<T>(path, { ...options, method: "GET" }),
   post: <T>(path: string, options?: ApiClientOptions) =>
     request<T>(path, { ...options, method: "POST" }),
+  put: <T>(path: string, options?: ApiClientOptions) =>
+    request<T>(path, { ...options, method: "PUT" }),
 };

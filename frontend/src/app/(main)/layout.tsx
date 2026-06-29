@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { AUTH_COOKIE_NAME } from "@/modules/auth/auth.constants";
 import { LogoutButton } from "@/modules/auth/components/logout-button";
+import { AUTH_COOKIE_NAME } from "@/modules/auth/types/auth.constants";
 import { Button } from "@/shared/components/ui/button";
 
 export default async function MainLayout({
@@ -22,7 +22,8 @@ export default async function MainLayout({
               className="text-sm font-medium uppercase tracking-[0.3em] text-muted-foreground"
               href={hasSession ? "/preferences" : "/"}
             >
-              Newsletter Inteligente
+              <span className="sm:hidden">NI</span>
+              <span className="hidden sm:inline">Newsletter Inteligente</span>
             </Link>
           </div>
 
