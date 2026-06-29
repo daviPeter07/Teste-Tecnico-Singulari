@@ -241,9 +241,3 @@ Ao final deste PR, o projeto passa a oferecer:
 - compose isolado para o frontend
 - bootstrap do backend mais estável no Docker
 - documentação consolidada da solução
-
-## Observações rápidas
-
-- o título atual da branch é `Feature/frontend-implement-news-and-preferences`, mas o nome sugerido acima representa melhor o escopo real do PR
-- não consegui renomear o PR remoto diretamente a partir deste ambiente porque o `gh` não está disponível aqui
-- se for manter este resumo no repositório, ele pode ser enviado junto do PR como apoio para review técnico
