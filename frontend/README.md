@@ -1,22 +1,22 @@
 # Newsletter Inteligente - Frontend
 
-SPA desenvolvida em Next.js para o desafio da Newsletter Inteligente.
+SPA em Next.js para a interface da newsletter.
 
-O frontend cobre o núcleo essencial pedido no PDF:
+O frontend cobre o essencial do desafio:
 
-- exibir notícias em uma interface web
-- permitir filtro por período `day|week|month`
-- consumir a API real do backend
-- oferecer experiência responsiva para desktop e mobile
+- mostrar notícias em uma interface web
+- filtrar por período
+- paginar a listagem
+- consumir o backend real
+- funcionar bem no desktop e no mobile
 
-Além disso, também entrega bônus importantes:
+Também cobre bônus relevantes:
 
-- login e cadastro de usuários
+- login e cadastro
 - sessão autenticada com cookie `HttpOnly`
 - tela protegida de preferências
-- atualização de preferências do usuário
-- prefetch no servidor para a listagem principal
-- organização modular por domínio
+- edição de preferências do usuário
+- organização modular por domínio e camada
 
 ## Stack
 
@@ -26,204 +26,112 @@ Além disso, também entrega bônus importantes:
 - TypeScript
 - Tailwind CSS 4
 - shadcn/ui
-- TanStack React Query
+- TanStack Query
 - nuqs
 - Zod
 - Biome
 
-## Decisões Técnicas
+## Organização
 
-### Framework
+Foi adotada uma estrutura modular por domínio.
 
-Foi escolhido Next.js com App Router.
+- `auth`: login, cadastro, sessão e logout
+- `news`: listagem, filtros, paginação e leitura de notícias
+- `preferences`: leitura e atualização das preferências do usuário
 
-Motivos:
+Cada módulo concentra seus próprios `components`, `hooks`, `pages`, `queries`, `schemas`, `services` e `types`.
 
-- permite combinar renderização no servidor com interatividade no cliente
-- simplifica rotas públicas e protegidas no mesmo projeto
-- encaixa bem com formulários, cookies e server actions
-
-### Organização por módulos
-
-Foi adotado um monolito modular no frontend.
-
-Com isso:
-
-- cada domínio mantém seus próprios `components`, `hooks`, `pages`, `queries`, `schemas`, `services` e `types`
-- as regras de `auth`, `news` e `preferences` ficam desacopladas entre si
-- os arquivos em `app/` permanecem finos, servindo apenas como pontos de entrada
-
-### Comunicação com o backend
-
-O frontend consome diretamente a API REST já exposta pelo backend.
-
-Com isso:
-
-- a home usa o endpoint público de notícias
-- login, cadastro e preferências usam os endpoints autenticados reais
-- o frontend apenas consome o `summary` já enriquecido pelo backend, sem duplicar a lógica de IA
-
-### Sessão autenticada
-
-Foi escolhido armazenar o token em cookie `HttpOnly`.
-
-Com isso:
-
-- o token não fica exposto em variáveis globais do navegador
-- rotas protegidas podem ser validadas no servidor
-- logout e recuperação de sessão ficam centralizados no módulo de autenticação
-
-## Escopo Atual do Frontend
-
-### Essencial entregue
-
-- home com listagem de notícias
-- cards com título, fonte, resumo e data
-- filtro por período `Hoje`, `Semana` e `Mês`
-- consumo do endpoint real `GET /news`
-
-### Bônus já implementados
-
-- tela de login
-- tela de cadastro
-- persistência de sessão autenticada em cookie
-- redirecionamento de rotas públicas e protegidas
-- tela de preferências do usuário
-- atualização de preferências com feedback de loading, erro e sucesso
-
-## Estrutura de Módulos
-
-- `auth`: login, cadastro, sessão, logout e redirecionamentos
-- `news`: listagem principal, filtros e consumo da consulta pública
-- `preferences`: leitura e atualização das categorias do usuário autenticado
-
-## Arquitetura de Diretórios
+## Estrutura
 
 ```text
 src/
 |-- app/
-|   |-- (auth)/
-|   |   |-- login/
-|   |   `-- register/
-|   |-- (main)/
-|   |   `-- preferences/
-|   |-- layout.tsx
-|   `-- providers.tsx
 |-- modules/
 |   |-- auth/
-|   |   |-- components/
-|   |   |-- hooks/
-|   |   |-- pages/
-|   |   |-- schemas/
-|   |   |-- services/
-|   |   `-- types/
 |   |-- news/
-|   |   |-- components/
-|   |   |-- hooks/
-|   |   |-- pages/
-|   |   |-- queries/
-|   |   |-- services/
-|   |   `-- types/
 |   `-- preferences/
-|       |-- components/
-|       |-- hooks/
-|       |-- pages/
-|       |-- schemas/
-|       |-- services/
-|       `-- types/
 `-- shared/
     |-- components/
-    |   `-- ui/
     `-- lib/
-        |-- http/
-        `-- react-query/
 ```
 
-## Variáveis de Ambiente
+## Ambiente
 
-Crie um arquivo `.env.local` na raiz do frontend.
+O frontend usa um caminho simples:
 
-Variável principal:
+- `NEXT_PUBLIC_API_URL` recebe a URL pública se você quiser informar manualmente
+- se ela não existir, o app usa `/api`
+
+No modo com Docker, o `/api` é redirecionado pelo Next para o backend via `BACKEND_INTERNAL_URL`.
+
+Exemplo:
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:3333
+NEXT_PUBLIC_API_URL="/api"
+BACKEND_INTERNAL_URL="http://localhost:3333"
 ```
 
-Observações:
+Arquivos de exemplo:
 
-- apenas a URL pública da API deve ficar em `NEXT_PUBLIC_*`
-- tokens e segredos não devem ser expostos no frontend
+- [frontend/.env.example](/C:/Users/Peterson/Desktop/projects/teste-singu-pleno/frontend/.env.example:1)
+- [.env.example](/C:/Users/Peterson/Desktop/projects/teste-singu-pleno/.env.example:1)
 
-## Como Rodar Localmente
+## Como rodar
 
-### 1. Instalar dependências
+### Local
 
 ```bash
-npm install
+pnpm install
+pnpm dev
 ```
 
-### 2. Criar o `.env.local`
+### Docker só do frontend
 
-Copie a variável acima apontando para a API do backend.
-
-### 3. Rodar o frontend
+Esse compose sobe apenas o frontend. O backend deve já estar rodando fora dele.
 
 ```bash
-npm run dev
+docker compose -f frontend/docker-compose.yml up --build
+```
+
+Por padrão ele tenta acessar o backend em `http://host.docker.internal:3333`.
+
+### Docker do projeto completo
+
+```bash
+docker compose up --build
 ```
 
 ## Scripts
 
 ```bash
-npm run dev
-npm run build
-npm run start
-npm run lint
-npm run format
+pnpm dev
+pnpm build
+pnpm start
+pnpm lint
+pnpm format
 ```
 
-## Fluxo Atual da Home
+## Rotas
 
-```text
-Usuário acessa "/"
-       |
-       v
-HomePage interpreta o período atual
-       |
-       v
-Prefetch da consulta de notícias no servidor
-       |
-       v
-NewsFeed assume interações no cliente
-       |
-       v
-Usuário troca o período
-       |
-       v
-Nova consulta é disparada para atualizar a lista
-```
-
-## Telas Atuais
-
-### Públicas
+Públicas:
 
 - `/`
 - `/login`
 - `/register`
 
-### Protegidas
+Protegidas:
 
 - `/preferences`
 
-## Integrações com o Backend
+## Integrações
 
-### Públicas
+Públicas:
 
 - `GET /news`
 - `POST /users`
 - `POST /login`
 
-### Autenticadas
+Autenticadas:
 
 - `GET /me`
 - `POST /logout`
@@ -231,17 +139,8 @@ Nova consulta é disparada para atualizar a lista
 - `GET /users/me/preferences`
 - `PUT /users/me/preferences`
 
-## Observações Importantes
+## Observações
 
-- o frontend está estruturado para consumir a autenticação e preferências já prontas no backend
-- a IA não roda no frontend; ele apenas exibe os resumos gerados no backend
-- a listagem principal já usa o filtro por período, mas a navegação explícita entre páginas ainda não foi implementada na interface
-- a solução ainda não possui container próprio do frontend integrado ao compose principal do projeto
-- o build de produção ainda depende do ajuste das fontes remotas usadas no layout global
-
-## Observações Finais
-
-- o frontend está funcional para home, autenticação e preferências
-- a organização modular foi consolidada por camadas
-- a próxima entrega mais evidente no frontend é paginação visível na home
-- a próxima entrega mais evidente no projeto completo é containerizar também o frontend no fluxo principal
+- a IA não roda no frontend; ele apenas mostra os dados já preparados no backend
+- o compose da raiz sobe o projeto completo
+- o compose em `frontend/` existe para rodar a interface isoladamente
