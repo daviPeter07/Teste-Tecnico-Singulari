@@ -17,12 +17,18 @@ import {
 import { ApiError } from "@/shared/lib/http/api-error";
 
 function getCategoryOptions(categories: NewsCategory[]) {
-  return categories
-    .slice()
-    .sort((left, right) => left.name.localeCompare(right.name, "pt-BR"));
+  return categories.slice().sort((left, right) => {
+    if (left.name < right.name) return -1;
+    if (left.name > right.name) return 1;
+    return 0;
+  });
 }
 
-export function NewsFeed() {
+export function NewsFeed({
+  initialCategories,
+}: {
+  initialCategories: NewsCategory[];
+}) {
   const [period, setPeriod] = useQueryState("period", newsPeriodParser);
   const [page, setPage] = useQueryState("page", newsPageParser);
   const [category, setCategory] = useQueryState("category", newsCategoryParser);
@@ -34,16 +40,7 @@ export function NewsFeed() {
     period,
   });
 
-  const categories = getCategoryOptions(
-    Array.from(
-      new Map(
-        (newsQuery.data?.data ?? []).map((news) => [
-          news.category.slug,
-          news.category,
-        ]),
-      ).values(),
-    ),
-  );
+  const categories = getCategoryOptions(initialCategories);
 
   const errorMessage =
     newsQuery.error instanceof ApiError ? newsQuery.error.message : undefined;
