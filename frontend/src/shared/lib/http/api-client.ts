@@ -8,6 +8,13 @@ type ApiClientOptions = Omit<RequestInit, "body"> & {
 const getApiBaseUrl = () => {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 
+  if (typeof window === "undefined" && baseUrl.startsWith("/")) {
+    const serverBaseUrl =
+      process.env.BACKEND_INTERNAL_URL ?? "http://localhost:3333";
+
+    return `${serverBaseUrl.replace(/\/$/, "")}${baseUrl}`;
+  }
+
   return baseUrl.replace(/\/$/, "");
 };
 
