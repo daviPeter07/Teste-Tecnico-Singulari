@@ -2,27 +2,41 @@
 
 Aplicação full stack para o desafio da Newsletter Inteligente, com frontend em Next.js e backend em NestJS.
 
-O projeto cobre o fluxo principal pedido no teste:
+O projeto cobre o núcleo essencial pedido no PDF:
 
-- backend servindo notícias com paginação e filtro por período
-- frontend exibindo as notícias em SPA
-- agente curador rodando em worker separado
-- banco relacional com PostgreSQL
-- filas assíncronas com Redis e BullMQ
-- Docker Compose para subir o ambiente completo
+- um backend que serve notícias
+- um frontend que mostra essas notícias
+- um agente curador rodando em worker separado
 
-## Estrutura
+Além disso, também entrega bônus relevantes:
+
+- login e cadastro
+- sessão autenticada com JWT e cookie `HttpOnly`
+- preferências do usuário
+- mensageria com Redis e BullMQ
+- resumo por IA no backend
+- Docker Compose para subir o ambiente
+- documentação consolidada
+
+## Stack
+
+- Frontend: Next.js 16, React 19, TypeScript, Tailwind CSS 4, TanStack Query
+- Backend: NestJS, Prisma, PostgreSQL, Redis, BullMQ
+- Infra: Docker Compose
+
+## Organização do repositório
 
 ```text
 .
 |-- backend/
 |-- docs/
 |-- frontend/
+|-- .env.example
 |-- docker-compose.yml
 `-- README.md
 ```
 
-## Módulos principais
+## Estrutura por aplicação
 
 ### Frontend
 
@@ -35,22 +49,35 @@ O projeto cobre o fluxo principal pedido no teste:
 - `auth`: cadastro, login, logout e JWT
 - `news`: listagem pública de notícias
 - `preferences` e `users`: preferências do usuário autenticado
-- `curation`: agente, enriquecimento e acompanhamento de execução
+- `curation`: agente curador, enrichment e acompanhamento de execução
 - `queue`: filas BullMQ
 - `ai`: provedor de resumo
 - `health`: health check
 
-## Stack
+## Escopo atual do projeto
 
-- Frontend: Next.js 16, React 19, TypeScript, Tailwind CSS 4, TanStack Query
-- Backend: NestJS, Prisma, PostgreSQL, Redis, BullMQ
-- Infra: Docker Compose
+### Essencial entregue
+
+- listagem de notícias com paginação
+- filtro por período `day|week|month`
+- frontend consumindo notícias reais
+- worker separado para curadoria
+- banco relacional com categorias e notícias
+
+### Bônus já implementados
+
+- autenticação com cadastro, login e logout
+- preferências do usuário autenticado
+- mensageria desacoplada com Redis e BullMQ
+- resumo por IA no backend
+- documentação do frontend, backend e repositório
+- conteinerização do fluxo principal
 
 ## Como rodar
 
-### Projeto completo com Docker
+### Projeto completo pela raiz
 
-1. Crie os arquivos de ambiente:
+Crie os arquivos de ambiente:
 
 ```bash
 cp .env.example .env
@@ -58,7 +85,7 @@ cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env
 ```
 
-2. Suba tudo:
+Depois suba tudo pela raiz:
 
 ```bash
 docker compose down --remove-orphans
@@ -73,13 +100,27 @@ Serviços expostos:
 - postgres: `localhost:5433`
 - redis: `localhost:6379`
 
-### Frontend isolado
+### Backend isolado
 
-Com o backend já rodando em `localhost:3333`:
+Para rodar só o ambiente do backend, entre na pasta `backend/` e use o compose de lá:
 
 ```bash
-docker compose -f frontend/docker-compose.yml up --build
+cd backend
+docker compose up --build
 ```
+
+Esse fluxo sobe os serviços definidos dentro de `backend/docker-compose.yaml`.
+
+### Frontend isolado
+
+Para rodar só o frontend, entre na pasta `frontend/` e use o compose de lá:
+
+```bash
+cd frontend
+docker compose up --build
+```
+
+Esse fluxo usa `frontend/docker-compose.yml`.
 
 ## Variáveis de ambiente
 
@@ -95,7 +136,7 @@ Use `backend/.env.example`.
 
 Use `frontend/.env.example`.
 
-## Fluxo atual
+## Fluxo atual da aplicação
 
 ```text
 Frontend -> /api/* -> proxy do Next -> Backend
@@ -109,3 +150,11 @@ Worker -> Redis/BullMQ -> PostgreSQL
 - Backend: `backend/README.md`
 - Frontend: `frontend/README.md`
 - Requisitos do desafio: `docs/teste_singu-desenvolvedor-pleno.extracted.txt`
+- Resumos dos PRs: pasta `docs/`
+
+## Observações importantes
+
+- o backend real continua exposto em `localhost:3333`
+- o frontend usa `/api` e delega o redirecionamento para o proxy do Next
+- o resumo por IA e a mensageria ficam concentrados no backend e no worker
+- os READMEs específicos de `backend/` e `frontend/` detalham melhor cada aplicação isoladamente
