@@ -29,7 +29,7 @@ Além disso, também entrega bônus importantes:
 - BullMQ
 - Docker Compose
 
-## Decisões Técnicas
+## Decisões técnicas
 
 ### Banco de dados
 
@@ -63,7 +63,7 @@ O backend usa:
 
 ### Mensageria
 
-Foi escolhido BullMQ com Redis para desacoplar a etapa de descoberta da etapa de processamento/persistência.
+Foi escolhido BullMQ com Redis para desacoplar a etapa de descoberta da etapa de processamento e persistência.
 
 Com isso:
 
@@ -72,7 +72,7 @@ Com isso:
 - cada notícia encontrada vira um job independente de processamento
 - o consumidor enriquece, resume e salva a notícia no banco
 
-## Escopo Atual do Backend
+## Escopo atual do backend
 
 ### Essencial entregue
 
@@ -98,9 +98,9 @@ Com isso:
 - rastreamento de itens processados, salvos e com falha por execução
 - testes unitários cobrindo os principais serviços, providers e processors
 
-## Agente Curador High-Code
+## Agente curador high-code
 
-O requisito obrigatório do desafio para o agente é atendido por um worker próprio em NestJS, sem uso de plataformas low-code/no-code.
+O requisito obrigatório do desafio para o agente é atendido por um worker próprio em NestJS, sem uso de plataformas low-code ou no-code.
 
 Hoje o agente suporta duas estratégias explícitas de descoberta:
 
@@ -122,7 +122,7 @@ Content-Type: application/json
 
 Com `local-json`, o agente interpreta sinais estruturados como variação de latência, adoção de IA, redução de bundle e queda no tempo de detecção de incidentes para produzir manchetes e corpo de notícia antes de publicar os itens na fila.
 
-## Modelagem Principal
+## Modelagem principal
 
 ### `users`
 
@@ -189,7 +189,7 @@ Registra cada execução do agente curador, com contadores de processamento.
 - `started_at`
 - `finished_at`
 
-## Estrutura de Módulos
+## Estrutura de módulos
 
 - `auth`: cadastro, login, logout, JWT e sessões
 - `news`: listagem de notícias e filtros
@@ -201,7 +201,7 @@ Registra cada execução do agente curador, com contadores de processamento.
 - `health`: health check do banco
 - `common`: paginação, decorators, exceptions, validações, interceptors e contratos compartilhados
 
-## Arquitetura de Diretórios
+## Arquitetura de diretórios
 
 ```text
 src/
@@ -224,7 +224,7 @@ src/
 `-- worker.ts        # inicialização do worker
 ```
 
-## Variáveis de Ambiente
+## Variáveis de ambiente
 
 Use o arquivo `.env.example` como base.
 
@@ -262,7 +262,7 @@ Observações:
 - isso garante que ambiente local, CI e Docker usem a mesma versão do gerenciador
 - no Docker, `REDIS_HOST` é sobrescrito para `redis`
 
-## Como Rodar Localmente
+## Como rodar localmente
 
 ### 1. Instalar dependências
 
@@ -298,26 +298,19 @@ pnpm prisma:seed
 pnpm start:dev
 ```
 
-### 7. Rodar o worker (em outro terminal)
+### 7. Rodar o worker em outro terminal
 
 ```bash
 pnpm start:worker
 ```
 
-## Como Rodar com Docker Compose
+## Como rodar com Docker Compose
 
 ```bash
 docker compose up --build
 ```
 
 O compose sobe 4 containers: `api`, `worker`, `postgres` e `redis`.
-
-Se estiver subindo tudo pela primeira vez, ainda é necessário aplicar migration e seed:
-
-```bash
-docker compose exec api pnpm prisma migrate dev
-docker compose exec api pnpm prisma:seed
-```
 
 No ambiente Docker:
 
@@ -334,7 +327,7 @@ Para teste manual do fluxo completo, use:
 
 - `backend/http/curation-flow.http`
 
-## Endpoints Principais
+## Endpoints principais
 
 ### Públicos
 
@@ -353,7 +346,7 @@ Para teste manual do fluxo completo, use:
 - `POST /curation/run`
 - `GET /curation/runs/:id`
 
-## Exemplos de Uso
+## Exemplos de uso
 
 ### Notícias com filtro por período
 
@@ -395,7 +388,7 @@ O worker processa a descoberta e o enriquecimento de forma assíncrona. Consulte
 
 Se `AI_PROVIDER=openrouter` estiver configurado, o consumidor usa o provider real para gerar o resumo antes de salvar a notícia no banco.
 
-## Fluxo de Teste Manual
+## Fluxo de teste manual
 
 O arquivo `backend/http/curation-flow.http` cobre o fluxo completo da aplicação:
 
@@ -444,7 +437,7 @@ pnpm test:cov
 pnpm test:e2e
 ```
 
-## Boas Práticas Aplicadas
+## Boas práticas aplicadas
 
 - `ValidationPipe` global
 - `JwtAuthGuard` global com `@Public()` para rotas abertas
@@ -453,7 +446,7 @@ pnpm test:e2e
 - interceptor de logging nas rotas de curadoria
 - exception filter para exceções de domínio
 
-## Arquitetura do Fluxo de Curadoria
+## Arquitetura do fluxo de curadoria
 
 ```text
 POST /curation/run
@@ -481,7 +474,7 @@ POST /curation/run
    Run finaliza: COMPLETED | PARTIAL | FAILED
 ```
 
-## Observações Finais
+## Observações finais
 
 - o backend compila com `pnpm build`
 - o seed cria categorias e notícias de exemplo para desenvolvimento

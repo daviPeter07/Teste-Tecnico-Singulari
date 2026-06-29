@@ -1,14 +1,14 @@
 # Newsletter Inteligente
 
-Aplicacao full stack para o desafio da Newsletter Inteligente, com frontend em Next.js e backend em NestJS.
+Aplicação full stack para o desafio da Newsletter Inteligente, com frontend em Next.js e backend em NestJS.
 
 O projeto cobre o fluxo principal pedido no teste:
 
-- backend servindo noticias com paginacao e filtro por periodo
-- frontend exibindo as noticias em SPA
+- backend servindo notícias com paginação e filtro por período
+- frontend exibindo as notícias em SPA
 - agente curador rodando em worker separado
 - banco relacional com PostgreSQL
-- filas assincronas com Redis e BullMQ
+- filas assíncronas com Redis e BullMQ
 - Docker Compose para subir o ambiente completo
 
 ## Estrutura
@@ -22,20 +22,20 @@ O projeto cobre o fluxo principal pedido no teste:
 `-- README.md
 ```
 
-## Modulos principais
+## Módulos principais
 
 ### Frontend
 
-- `auth`: login, cadastro, sessao e logout
-- `news`: listagem, filtros e paginacao
-- `preferences`: leitura e edicao de preferencias
+- `auth`: login, cadastro, sessão e logout
+- `news`: listagem, filtros e paginação
+- `preferences`: leitura e edição de preferências
 
 ### Backend
 
 - `auth`: cadastro, login, logout e JWT
-- `news`: listagem publica de noticias
-- `preferences` e `users`: preferencias do usuario autenticado
-- `curation`: agente, enriquecimento e acompanhamento de execucao
+- `news`: listagem pública de notícias
+- `preferences` e `users`: preferências do usuário autenticado
+- `curation`: agente, enriquecimento e acompanhamento de execução
 - `queue`: filas BullMQ
 - `ai`: provedor de resumo
 - `health`: health check
@@ -65,7 +65,7 @@ docker compose down --remove-orphans
 docker compose up -d --build
 ```
 
-Servicos expostos:
+Serviços expostos:
 
 - frontend: `http://localhost:3000`
 - backend: `http://localhost:3333`
@@ -75,17 +75,17 @@ Servicos expostos:
 
 ### Frontend isolado
 
-Com o backend ja rodando em `localhost:3333`:
+Com o backend já rodando em `localhost:3333`:
 
 ```bash
 docker compose -f frontend/docker-compose.yml up --build
 ```
 
-## Variaveis de ambiente
+## Variáveis de ambiente
 
 ### Raiz
 
-Use `.env.example` como base para portas e variaveis compartilhadas do ambiente local.
+Use `.env.example` como base para portas e variáveis compartilhadas do ambiente local.
 
 ### Backend
 
@@ -104,7 +104,7 @@ Backend -> Redis/BullMQ
 Worker -> Redis/BullMQ -> PostgreSQL
 ```
 
-## Documentacao complementar
+## Documentação complementar
 
 - Backend: `backend/README.md`
 - Frontend: `frontend/README.md`

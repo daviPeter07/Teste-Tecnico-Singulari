@@ -4,19 +4,19 @@ SPA em Next.js para a interface da newsletter.
 
 O frontend cobre o essencial do desafio:
 
-- mostrar noticias em uma interface web
-- filtrar por periodo
+- mostrar notícias em uma interface web
+- filtrar por período
 - paginar a listagem
 - consumir o backend real
 - funcionar bem no desktop e no mobile
 
-Tambem cobre bonus relevantes:
+Também cobre bônus relevantes:
 
 - login e cadastro
-- sessao autenticada com cookie `HttpOnly`
-- tela protegida de preferencias
-- edicao de preferencias do usuario
-- organizacao modular por dominio e camada
+- sessão autenticada com cookie `HttpOnly`
+- tela protegida de preferências
+- edição de preferências do usuário
+- organização modular por domínio e camada
 
 ## Stack
 
@@ -31,15 +31,15 @@ Tambem cobre bonus relevantes:
 - Zod
 - Biome
 
-## Organizacao
+## Organização
 
-Foi adotada uma estrutura modular por dominio.
+Foi adotada uma estrutura modular por domínio.
 
-- `auth`: login, cadastro, sessao e logout
-- `news`: listagem, filtros, paginacao e leitura de noticias
-- `preferences`: leitura e atualizacao das preferencias do usuario
+- `auth`: login, cadastro, sessão e logout
+- `news`: listagem, filtros, paginação e leitura de notícias
+- `preferences`: leitura e atualização das preferências do usuário
 
-Cada modulo concentra seus proprios `components`, `hooks`, `pages`, `queries`, `schemas`, `services` e `types`.
+Cada módulo concentra seus próprios `components`, `hooks`, `pages`, `queries`, `schemas`, `services` e `types`.
 
 ## Estrutura
 
@@ -59,10 +59,10 @@ src/
 
 O frontend usa um caminho simples:
 
-- `NEXT_PUBLIC_API_URL` recebe a URL publica se voce quiser informar manualmente
-- se ela nao existir, o app usa `/api`
+- `NEXT_PUBLIC_API_URL` recebe a URL pública se você quiser informar manualmente
+- se ela não existir, o app usa `/api`
 
-No modo com Docker, o `/api` e redirecionado pelo Next para o backend via `BACKEND_INTERNAL_URL`.
+No modo com Docker, o `/api` é redirecionado pelo Next para o backend via `BACKEND_INTERNAL_URL`.
 
 Exemplo:
 
@@ -85,15 +85,15 @@ pnpm install
 pnpm dev
 ```
 
-### Docker so do frontend
+### Docker só do frontend
 
-Esse compose sobe apenas o frontend. O backend deve ja estar rodando fora dele.
+Esse compose sobe apenas o frontend. O backend deve já estar rodando fora dele.
 
 ```bash
 docker compose -f frontend/docker-compose.yml up --build
 ```
 
-Por padrao ele tenta acessar o backend em `http://host.docker.internal:3333`.
+Por padrão ele tenta acessar o backend em `http://host.docker.internal:3333`.
 
 ### Docker do projeto completo
 
@@ -113,7 +113,7 @@ pnpm format
 
 ## Rotas
 
-Publicas:
+Públicas:
 
 - `/`
 - `/login`
@@ -123,9 +123,9 @@ Protegidas:
 
 - `/preferences`
 
-## Integracoes
+## Integrações
 
-Publicas:
+Públicas:
 
 - `GET /news`
 - `POST /users`
@@ -139,8 +139,8 @@ Autenticadas:
 - `GET /users/me/preferences`
 - `PUT /users/me/preferences`
 
-## Observacoes
+## Observações
 
-- a IA nao roda no frontend; ele apenas mostra os dados ja preparados no backend
+- a IA não roda no frontend; ele apenas mostra os dados já preparados no backend
 - o compose da raiz sobe o projeto completo
 - o compose em `frontend/` existe para rodar a interface isoladamente
