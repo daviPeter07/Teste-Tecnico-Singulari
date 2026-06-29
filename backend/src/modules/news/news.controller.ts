@@ -1,13 +1,11 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { NewsService } from './news.service';
 import { ListNewsQueryDto } from './dto/list-news-query.dto';
-import {
-  ApiOkResponse,
-  ApiOperation,
-  getSchemaPath,
-} from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, getSchemaPath } from '@nestjs/swagger';
 import { Public } from '../../common/auth/public.decorator';
 import { NewsResponseDto } from './dto/news-response.dto';
+import { CurrentUser } from '../../common/auth/current-user.decorator';
+import type { AuthenticatedUser } from '../../common/auth/authenticated-user.type';
 
 @Controller('news')
 export class NewsController {
@@ -18,7 +16,7 @@ export class NewsController {
   @ApiOperation({
     summary: 'List news',
     description:
-      'Returns a paginated list of news with optional filters by period and category.',
+      'Returns a paginated list of news with optional filters by period and category. If authenticated, filters by user preferences.',
   })
   @ApiOkResponse({
     description: 'Paginated news list',
@@ -45,7 +43,10 @@ export class NewsController {
       },
     },
   })
-  findMany(@Query() query: ListNewsQueryDto) {
-    return this.newsService.findMany(query);
+  findMany(
+    @Query() query: ListNewsQueryDto,
+    @CurrentUser() user: AuthenticatedUser | null,
+  ) {
+    return this.newsService.findMany(query, user);
   }
 }

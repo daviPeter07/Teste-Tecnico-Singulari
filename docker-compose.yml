@@ -48,7 +48,7 @@ services:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
 
   worker:
     build:
@@ -69,6 +69,7 @@ services:
     depends_on:
       api:
         condition: service_healthy
+    command: sh -c "pnpm start:worker"
 
   postgres:
     image: postgres:17-alpine
@@ -92,6 +93,11 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   frontend_node_modules:
@@ -100,3 +106,4 @@ volumes:
   backend_worker_node_modules:
   postgres_data:
   redis_data:
+

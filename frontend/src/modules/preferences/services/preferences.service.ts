@@ -7,8 +7,8 @@ import type {
 import { apiClient } from "@/shared/lib/http/api-client";
 
 export const preferencesService = {
-  listAvailablePreferences(token: string) {
-    return apiClient.get<Preference[]>("/preferences", { token });
+  listAvailablePreferences() {
+    return apiClient.get<Preference[]>("/preferences");
   },
 
   listMyPreferences(token: string) {

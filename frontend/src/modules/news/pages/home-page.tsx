@@ -7,6 +7,7 @@ import {
   normalizeNewsPeriod,
 } from "@/modules/news/queries/news-list.query";
 import { NEWS_PAGE_LIMIT } from "@/modules/news/types/news.types";
+import { preferencesService } from "@/modules/preferences/services/preferences.service";
 import { createQueryClient } from "@/shared/lib/react-query/query-client";
 
 type HomePageProps = {
@@ -24,14 +25,17 @@ export async function HomePage({ searchParams }: HomePageProps) {
   const period = normalizeNewsPeriod(resolvedSearchParams.period);
   const queryClient = createQueryClient();
 
-  await queryClient.prefetchQuery(
-    getNewsListQueryOptions({
-      category,
-      limit: NEWS_PAGE_LIMIT,
-      page,
-      period,
-    }),
-  );
+  const [categories] = await Promise.all([
+    preferencesService.listAvailablePreferences().catch(() => []),
+    queryClient.prefetchQuery(
+      getNewsListQueryOptions({
+        category,
+        limit: NEWS_PAGE_LIMIT,
+        page,
+        period,
+      }),
+    ),
+  ]);
 
   return (
     <div className="grid w-full gap-8">
@@ -41,17 +45,18 @@ export async function HomePage({ searchParams }: HomePageProps) {
         </p>
         <div className="space-y-3">
           <h1 className="max-w-4xl text-4xl leading-none font-semibold tracking-tight text-foreground sm:text-5xl">
-            As principais novidades de tecnologia, em um só lugar.
+            Navegue por notícias de tecnologia atualizadas e filtradas por
+            período.
           </h1>
           <p className="max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-            Acompanhe notícias selecionadas por período e encontre rapidamente o
-            que está movimentando o mercado.
+            Acompanhe a curadoria de mercado e encontre rapidamente o que
+            importa.
           </p>
         </div>
       </section>
 
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <NewsFeed />
+        <NewsFeed initialCategories={categories} />
       </HydrationBoundary>
     </div>
   );

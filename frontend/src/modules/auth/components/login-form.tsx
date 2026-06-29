@@ -32,7 +32,7 @@ export function LoginForm() {
           {formError ? (
             <Alert variant="destructive">
               <AlertCircleIcon className="size-4" />
-              <AlertTitle>Falha na autenticação</AlertTitle>
+              <AlertTitle>Login não realizado</AlertTitle>
               <AlertDescription>{formError}</AlertDescription>
             </Alert>
           ) : null}

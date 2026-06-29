@@ -16,10 +16,21 @@ const isProtectedRoute = (pathname: string) =>
   );
 
 export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, searchParams } = request.nextUrl;
   const hasSessionCookie = Boolean(
     request.cookies.get(AUTH_COOKIE_NAME)?.value,
   );
+
+  if (
+    pathname === AUTH_LOGIN_PATH &&
+    searchParams.get("clear_session") === "1"
+  ) {
+    const response = NextResponse.redirect(
+      new URL(AUTH_LOGIN_PATH, request.url),
+    );
+    response.cookies.delete(AUTH_COOKIE_NAME);
+    return response;
+  }
 
   if (isProtectedRoute(pathname) && !hasSessionCookie) {
     return NextResponse.redirect(new URL(AUTH_LOGIN_PATH, request.url));

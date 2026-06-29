@@ -13,7 +13,7 @@ export async function PreferencesPage() {
 
   try {
     const [availablePreferences, initialPreferences] = await Promise.all([
-      preferencesService.listAvailablePreferences(token),
+      preferencesService.listAvailablePreferences(),
       preferencesService.listMyPreferences(token),
     ]);
 

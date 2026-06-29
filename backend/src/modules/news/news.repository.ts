@@ -9,6 +9,7 @@ type FindManyNewsParams = {
   take: number;
   publishedAtFrom?: Date;
   categorySlug?: string;
+  categorySlugsIn?: string[];
 };
 
 type UpsertCuratedNewsParams = {
@@ -61,6 +62,19 @@ export class NewsRepository extends PrismaRepository {
     });
   }
 
+  async findPreferredCategorySlugs(userId: string): Promise<string[]> {
+    const preferences = await this.prismaService.userPreference.findMany({
+      where: { userId },
+      include: {
+        category: {
+          select: { slug: true },
+        },
+      },
+    });
+
+    return preferences.map((p) => p.category.slug);
+  }
+
   upsertCuratedNews(params: UpsertCuratedNewsParams) {
     const data = {
       title: params.title,
@@ -107,6 +121,14 @@ export class NewsRepository extends PrismaRepository {
       where.category = {
         is: {
           slug: params.categorySlug,
+        },
+      };
+    } else if (params.categorySlugsIn && params.categorySlugsIn.length > 0) {
+      where.category = {
+        is: {
+          slug: {
+            in: params.categorySlugsIn,
+          },
         },
       };
     }

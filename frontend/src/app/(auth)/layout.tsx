@@ -14,19 +14,14 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
               Notícias organizadas para você acompanhar o que importa.
             </h1>
             <p className="max-w-xl text-sm leading-7 text-muted-foreground sm:text-base">
-              Entre para acessar sua conta, acompanhar a curadoria e preparar a
-              sua experiência dentro da aplicação.
+              Acesse sua conta para ver notícias filtradas e salvar suas
+              preferências.
             </p>
           </div>
 
           <div className="grid gap-3 text-sm text-muted-foreground">
             <div className="rounded-2xl border border-border/70 bg-background/72 px-5 py-4">
-              Um espaço simples para entrar, criar conta e seguir para as áreas
-              autenticadas da plataforma.
-            </div>
-            <div className="rounded-2xl border border-border/70 bg-background/72 px-5 py-4">
-              A base de autenticação já está pronta para conectar preferências,
-              notícias e novas jornadas da aplicação.
+              Suas preferências personalizam o feed de notícias.
             </div>
           </div>
         </section>

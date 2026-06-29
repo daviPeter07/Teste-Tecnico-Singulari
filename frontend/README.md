@@ -13,10 +13,11 @@ O frontend cobre o essencial do desafio:
 Também cobre bônus relevantes:
 
 - login e cadastro
-- sessão autenticada com cookie `HttpOnly`
+- sessão autenticada gerenciada com segurança no Edge (Middleware + Server Actions) via cookie `HttpOnly`
 - tela protegida de preferências
 - edição de preferências do usuário
 - organização modular por domínio e camada
+- suporte nativo a dark mode / light mode
 
 ## Stack
 

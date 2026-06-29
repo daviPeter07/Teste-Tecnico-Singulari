@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
@@ -13,11 +18,17 @@ import { LogoutResponseDto } from './dto/logout-response.dto';
 import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements OnModuleInit {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly authRepository: AuthRepository,
   ) {}
+
+  async onModuleInit() {
+    await this.cleanupExpiredSessions();
+  }
 
   async register(body: RegisterDto): Promise<AuthResponseDto> {
     const existingUser = await this.authRepository.findUserByEmail(body.email);
@@ -66,6 +77,20 @@ export class AuthService {
     }
 
     return UserResponseDto.fromEntity(found);
+  }
+
+  private async cleanupExpiredSessions() {
+    try {
+      const result = await this.authRepository.cleanupExpiredSessions();
+      if (result.count > 0) {
+        this.logger.log(`Cleaned up ${result.count} expired/revoked sessions.`);
+      }
+    } catch (error) {
+      this.logger.warn(
+        'Failed to cleanup expired sessions on startup.',
+        error instanceof Error ? error.message : undefined,
+      );
+    }
   }
 
   private async createAuthenticatedResponse(user: {

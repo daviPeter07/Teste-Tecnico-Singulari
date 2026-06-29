@@ -94,4 +94,3 @@ export async function updateMyPreferencesAction(
   }
 }
 
-export { INITIAL_STATE as initialUpdatePreferencesState };

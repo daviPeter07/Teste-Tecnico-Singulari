@@ -2,10 +2,15 @@
 
 import { useActionState, useEffect, useMemo, useState } from "react";
 import {
-  initialUpdatePreferencesState,
+  type UpdatePreferencesActionState,
   updateMyPreferencesAction,
 } from "@/modules/preferences/services/preferences.actions";
 import type { Preference } from "@/modules/preferences/types/preferences.types";
+
+const initialUpdatePreferencesState: UpdatePreferencesActionState = {
+  status: "idle",
+  savedIds: [],
+};
 
 function getPreferenceIds(preferences?: Preference[]) {
   return [...(preferences ?? [])].map((preference) => preference.id).sort();

@@ -8,6 +8,7 @@ import type { NewsItem } from "@/modules/news/types/news.types";
 const publishedAtFormatter = new Intl.DateTimeFormat("pt-BR", {
   dateStyle: "medium",
   timeStyle: "short",
+  timeZone: "America/Sao_Paulo",
 });
 
 function formatPublishedAt(value: string) {
