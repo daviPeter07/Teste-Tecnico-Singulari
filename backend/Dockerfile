@@ -7,11 +7,12 @@ WORKDIR /app
 RUN corepack enable
 
 COPY package.json pnpm-lock.yaml ./
-
 RUN pnpm install --frozen-lockfile
-
 COPY . .
+COPY docker/start-service.sh /usr/local/bin/start-service.sh
+
+RUN chmod +x /usr/local/bin/start-service.sh
 
 EXPOSE 3333
 
-CMD ["pnpm", "start:dev"]
+CMD ["start-service.sh"]

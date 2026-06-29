@@ -29,6 +29,7 @@ services:
       - ./backend/.env
     environment:
       CI: "true"
+      SERVICE_MODE: api
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/newsletter_db?schema=public
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -38,11 +39,10 @@ services:
       - ./backend:/app
       - backend_api_node_modules:/app/node_modules
     depends_on:
-      migrate:
-        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_started
-    command: pnpm start:dev
 
   worker:
     build:
@@ -53,6 +53,7 @@ services:
       - ./backend/.env
     environment:
       CI: "true"
+      SERVICE_MODE: worker
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/newsletter_db?schema=public
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -60,28 +61,8 @@ services:
       - ./backend:/app
       - backend_worker_node_modules:/app/node_modules
     depends_on:
-      migrate:
-        condition: service_completed_successfully
-      redis:
+      api:
         condition: service_started
-    command: pnpm start:worker
-
-  migrate:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: newsletter_migrate
-    env_file:
-      - ./backend/.env
-    environment:
-      CI: "true"
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/newsletter_db?schema=public
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-    depends_on:
-      postgres:
-        condition: service_healthy
-    command: sh -c "pnpm prisma migrate deploy && pnpm prisma:seed"
 
   postgres:
     image: postgres:17-alpine
