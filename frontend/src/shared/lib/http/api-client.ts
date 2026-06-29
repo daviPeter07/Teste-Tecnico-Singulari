@@ -5,22 +5,33 @@ type ApiClientOptions = Omit<RequestInit, "body"> & {
   token?: string;
 };
 
-const getApiBaseUrl = () => {
+const normalizeBaseUrl = (baseUrl: string) => baseUrl.replace(/\/$/, "");
+
+const isAbsoluteUrl = (value: string) => /^https?:\/\//.test(value);
+
+const getApiBaseUrl = async () => {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 
-  if (typeof window === "undefined" && baseUrl.startsWith("/")) {
-    const serverBaseUrl =
-      process.env.BACKEND_INTERNAL_URL ?? "http://localhost:3333";
-
-    return `${serverBaseUrl.replace(/\/$/, "")}${baseUrl}`;
+  if (typeof window !== "undefined" || isAbsoluteUrl(baseUrl)) {
+    return normalizeBaseUrl(baseUrl);
   }
 
-  return baseUrl.replace(/\/$/, "");
+  const { headers } = await import("next/headers");
+  const requestHeaders = await headers();
+  const protocol = requestHeaders.get("x-forwarded-proto") ?? "http";
+  const host =
+    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+
+  if (!host) {
+    throw new Error("Missing host header while building server API URL.");
+  }
+
+  return `${protocol}://${host}${normalizeBaseUrl(baseUrl)}`;
 };
 
-const buildUrl = (path: string) => {
+const buildUrl = async (path: string) => {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${getApiBaseUrl()}${normalizedPath}`;
+  return `${await getApiBaseUrl()}${normalizedPath}`;
 };
 
 const buildHeaders = (options: ApiClientOptions) => {
@@ -45,7 +56,7 @@ async function request<T>(
   path: string,
   options: ApiClientOptions = {},
 ): Promise<T> {
-  const response = await fetch(buildUrl(path), {
+  const response = await fetch(await buildUrl(path), {
     ...options,
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
     headers: buildHeaders(options),
