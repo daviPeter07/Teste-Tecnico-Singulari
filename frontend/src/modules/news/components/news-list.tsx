@@ -1,5 +1,6 @@
 import { AlertCircleIcon } from "lucide-react";
-import { NewsCard } from "@/modules/news/components/news-card";
+import { NewsGrid } from "@/modules/news/components/news-grid";
+import { NewsPagination } from "@/modules/news/components/news-pagination";
 import type { PaginatedNewsResponse } from "@/modules/news/types/news.types";
 import {
   Alert,
@@ -10,32 +11,33 @@ import { Button } from "@/shared/components/ui/button";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 
 type NewsListProps = {
+  currentPage: number;
   isLoading: boolean;
   isRefreshing: boolean;
   hasError: boolean;
   errorMessage?: string;
   response?: PaginatedNewsResponse;
+  onPageChange: (page: number) => void;
   onRetry: () => void;
 };
 
 function NewsListSkeleton() {
   return (
-    <div className="grid gap-4">
-      {Array.from({ length: 3 }).map((_, index) => (
+    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      {Array.from({ length: 9 }).map((_, index) => (
         <div
-          className="rounded-2xl border border-border/70 bg-background/65 p-5"
+          className="rounded-2xl border border-border/70 bg-background p-5"
           key={`news-skeleton-${index + 1}`}
         >
           <div className="flex flex-wrap gap-2">
-            <Skeleton className="h-5 w-24 rounded-full" />
-            <Skeleton className="h-5 w-32 rounded-full" />
-            <Skeleton className="h-5 w-36 rounded-full" />
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-24" />
           </div>
-
-          <Skeleton className="mt-4 h-6 w-4/5" />
+          <Skeleton className="mt-4 h-6 w-5/6" />
           <Skeleton className="mt-3 h-4 w-full" />
           <Skeleton className="mt-2 h-4 w-11/12" />
-          <Skeleton className="mt-2 h-4 w-3/4" />
+          <Skeleton className="mt-2 h-4 w-10/12" />
+          <Skeleton className="mt-8 h-4 w-32" />
         </div>
       ))}
     </div>
@@ -43,11 +45,13 @@ function NewsListSkeleton() {
 }
 
 export function NewsList({
+  currentPage,
   isLoading,
   isRefreshing,
   hasError,
   errorMessage,
   response,
+  onPageChange,
   onRetry,
 }: NewsListProps) {
   if (isLoading && !response) {
@@ -77,25 +81,24 @@ export function NewsList({
   if (!response || response.data.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-border/80 px-6 py-14 text-center text-sm text-muted-foreground">
-        Nenhuma notícia foi encontrada para o período selecionado.
+        Nenhuma notícia foi encontrada para os filtros selecionados.
       </div>
     );
   }
 
   return (
-    <div className="grid gap-4">
-      <div className="flex items-center justify-between gap-4 text-xs text-muted-foreground">
-        <span>
-          {response.meta.total} notícia{response.meta.total === 1 ? "" : "s"}{" "}
-          encontrada
-          {response.meta.total === 1 ? "" : "s"}
-        </span>
-        {isRefreshing ? <span>Atualizando...</span> : null}
-      </div>
+    <div className="space-y-8">
+      {isRefreshing ? (
+        <p className="text-sm text-muted-foreground">Atualizando...</p>
+      ) : null}
 
-      {response.data.map((news) => (
-        <NewsCard key={news.id} news={news} />
-      ))}
+      <NewsGrid news={response.data} />
+
+      <NewsPagination
+        currentPage={currentPage}
+        meta={response.meta}
+        onPageChange={onPageChange}
+      />
     </div>
   );
 }

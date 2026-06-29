@@ -2,6 +2,8 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { NewsFeed } from "@/modules/news/components/news-feed";
 import {
   getNewsListQueryOptions,
+  normalizeNewsCategory,
+  normalizeNewsPage,
   normalizeNewsPeriod,
 } from "@/modules/news/queries/news-list.query";
 import { NEWS_PAGE_LIMIT } from "@/modules/news/types/news.types";
@@ -9,19 +11,24 @@ import { createQueryClient } from "@/shared/lib/react-query/query-client";
 
 type HomePageProps = {
   searchParams: Promise<{
+    category?: string | string[];
+    page?: string | string[];
     period?: string | string[];
   }>;
 };
 
 export async function HomePage({ searchParams }: HomePageProps) {
   const resolvedSearchParams = await searchParams;
+  const category = normalizeNewsCategory(resolvedSearchParams.category);
+  const page = normalizeNewsPage(resolvedSearchParams.page);
   const period = normalizeNewsPeriod(resolvedSearchParams.period);
   const queryClient = createQueryClient();
 
   await queryClient.prefetchQuery(
     getNewsListQueryOptions({
-      page: 1,
+      category,
       limit: NEWS_PAGE_LIMIT,
+      page,
       period,
     }),
   );

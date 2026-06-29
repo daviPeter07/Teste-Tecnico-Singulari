@@ -29,6 +29,27 @@ export function normalizeNewsPeriod(
   return DEFAULT_NEWS_PERIOD;
 }
 
+export function normalizeNewsPage(value: string | string[] | undefined) {
+  const rawValue = Array.isArray(value) ? value[0] : value;
+  const parsedValue = Number(rawValue);
+
+  if (Number.isInteger(parsedValue) && parsedValue > 0) {
+    return parsedValue;
+  }
+
+  return 1;
+}
+
+export function normalizeNewsCategory(value: string | string[] | undefined) {
+  const rawValue = Array.isArray(value) ? value[0] : value;
+
+  if (!rawValue) {
+    return undefined;
+  }
+
+  return rawValue.trim() || undefined;
+}
+
 export function getNewsListQueryOptions(params: ListNewsParams = {}) {
   const normalizedParams = normalizeListNewsParams(params);
 

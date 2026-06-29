@@ -22,7 +22,8 @@ export default async function MainLayout({
               className="text-sm font-medium uppercase tracking-[0.3em] text-muted-foreground"
               href={hasSession ? "/preferences" : "/"}
             >
-              Newsletter Inteligente
+              <span className="sm:hidden">NI</span>
+              <span className="hidden sm:inline">Newsletter Inteligente</span>
             </Link>
           </div>
 
