@@ -17,9 +17,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   handleRequest<TUser = AuthenticatedUser | null>(
     err: unknown,
     user: unknown,
-    info: unknown,
     context: ExecutionContext,
-    status?: unknown,
   ): TUser {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
@@ -30,9 +28,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return (user as TUser) || (null as unknown as TUser);
     }
 
-    if (err || !user) {
-      throw err || new UnauthorizedException();
+    if (err instanceof Error) {
+      throw err;
     }
+
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
     return user as TUser;
   }
 }
